@@ -53,4 +53,34 @@ class BaseDeDatos():
             #Se retornan los datos para luego visualizarlos en una tabla
             return resultados
         except mysql.connector.Error as err:
-            print("Se ha producido un error al obtener los datos",err)        
+            print("Se ha producido un error al obtener los datos",err)
+    
+    def Insertar_Datos(self,query,params):
+        if self.connection is None or self.cursor is None:
+            print("Error de conexion")
+            return None
+        
+        try:
+            self.cursor.execute(query,params)
+            self.connection.commit()
+            print("Datos insertados correctamente")
+        
+        except mysql.connector.Error as err:
+            print("Error al insertar los datos",err)
+
+
+# bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+# bd.CrearConexion()
+
+# nombre = input("Ingrese su nombre: ")
+# apellido = input("Ingrese su apellido: ")
+# direccion = input("Ingrese su direccion: ")
+# username = nombre + apellido
+# dni = int(input("Ingrese su DNI: "))
+# contraseña = input("Ingrese su contraseña: ")
+
+# query = "INSERT INTO Clientes (Nombre,Apellido,Direccion,DNI,Username,Contraseña) VALUES (%s,%s,%s,%s,%s,%s)"
+
+# bd.Insertar_Datos(query, (nombre,apellido,direccion,dni,username,contraseña))
+
+# bd.CerrarConexion()

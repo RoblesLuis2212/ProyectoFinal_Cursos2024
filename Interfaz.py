@@ -31,7 +31,7 @@ class App:
         self.boton_iniciar = CTkButton(self.root, text="Iniciar Sesión",height=40,font=("Segoe UI",14),command=self.ValidarDatos)
         self.boton_iniciar.place(x=140,y=250)
         
-        self.boton_registrarse = CTkButton(self.root, text="Registrarse",height=40,font=("Segoe UI",14))
+        self.boton_registrarse = CTkButton(self.root, text="Registrarse",height=40,font=("Segoe UI",14),command=self.Mostrar_Ventana)
         self.boton_registrarse.place(x=140,y=300)
     
     #Esta funcion validara los datos del formulario para poder iniciar sesion
@@ -42,10 +42,10 @@ class App:
         if not usuario or not contraseña:
             messagebox.showwarning("Advertencia","Por favor complete todos los campos")
             
-        bd = BaseDeDatos(host="localhost",user="root",password="Tecnica2020",database="Pruebitas")
+        bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
             
         bd.CrearConexion()
-        query = "SELECT * FROM Usuarios WHERE Usuario = %s AND Contraseña = %s"
+        query = "SELECT * FROM Clientes WHERE Username = %s AND Contraseña = %s"
         
         resultados = bd.ObtenerDatos(query,(usuario,contraseña))
             
@@ -55,3 +55,11 @@ class App:
             messagebox.showwarning("Advertencia","Error usuario o contraseña incorrectos")
             
             bd.CerrarConexion()
+    
+    def Mostrar_Ventana(self):
+        from Interfaz_Registro import Ventana_Registro 
+        self.root.withdraw()
+
+        segunda_ventana = CTkToplevel(self.root)
+        Ventana_Registro(segunda_ventana, self.root)
+        
