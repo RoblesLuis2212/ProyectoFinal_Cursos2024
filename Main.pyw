@@ -1,5 +1,5 @@
 from customtkinter import *
-from Interfaz import App
+from Interfaz_Login import App
 
 if __name__ == "__main__":
     root = CTk()
