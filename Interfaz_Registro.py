@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import messagebox
 from ConexionBD import BaseDeDatos
 from Interfaz_Login import App
+from Cifrado import *
 
 class Ventana_Registro:
     def __init__(self,root,vtn_secundaria):
@@ -82,6 +83,8 @@ class Ventana_Registro:
         direccion = self.entry_direccion.get()
         contraseña = self.entry_contraseña.get()
 
+        contraseña_cifrada = Cifrar_Contraseña(contraseña)
+
         username = nombre + apellido
 
         lista_datos = [nombre,apellido,DNI,telefono,obra_social,direccion,contraseña]
@@ -105,7 +108,7 @@ class Ventana_Registro:
             
             query = "INSERT INTO Clientes (Nombre,Apellido,Direccion,Telefono,DNI,Obra_Social,Username,Contraseña) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
 
-            bd.Insertar_Datos(query,(nombre,apellido,direccion,telefono,DNI,obra_social,username,contraseña))
+            bd.Insertar_Datos(query,(nombre,apellido,direccion,telefono,DNI,obra_social,username,contraseña_cifrada))
             messagebox.showinfo("Registro",f"Registro Realizado Correctamente \nsu username es: {username}")
             self.Limpiar_Campos()
             self.Retroceder_Ventana()

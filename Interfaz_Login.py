@@ -4,6 +4,7 @@ from tkinter import messagebox
 from ConexionBD import BaseDeDatos
 from Interfaz_Clientes import Ventana_Clientes
 from PIL import Image,ImageTk
+from Cifrado import *
 
 
 class App:
@@ -42,16 +43,19 @@ class App:
     def ValidarDatos(self):
         usuario = self.entry_username.get()
         contraseña = self.entry_contraseña.get()
+
+        clave_cifrada = Cifrar_Contraseña(contraseña)
             
         if not usuario or not contraseña:
             messagebox.showwarning("Advertencia","Por favor complete todos los campos")
+            return
             
         bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
-            
+
         bd.CrearConexion()
         query = "SELECT * FROM Clientes WHERE Username = %s AND Contraseña = %s"
         
-        resultados = bd.ObtenerDatos(query,(usuario,contraseña))
+        resultados = bd.ObtenerDatos(query,(usuario,clave_cifrada))
             
         if resultados:
             messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
@@ -59,7 +63,7 @@ class App:
         else:
             messagebox.showwarning("Advertencia","Error usuario o contraseña incorrectos")
             
-            bd.CerrarConexion()
+        bd.CerrarConexion()
     
     def Mostrar_Ventana(self):
         from Interfaz_Registro import Ventana_Registro 
