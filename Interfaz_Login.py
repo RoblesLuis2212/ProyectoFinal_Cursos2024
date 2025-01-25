@@ -53,13 +53,16 @@ class App:
         bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
 
         bd.CrearConexion()
-        query = "SELECT * FROM Clientes WHERE Username = %s AND Contraseña = %s"
+        query = "SELECT DNI,Username,Contraseña FROM Clientes WHERE Username = %s AND Contraseña = %s"
         
         resultados = bd.ObtenerDatos(query,(usuario,clave_cifrada))
+
+
             
         if resultados:
+            dni_cliente = resultados[0][0]
             messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
-            self.Mostrar_Menu_Clientes()
+            self.Mostrar_Menu_Clientes(dni_cliente)
         else:
             messagebox.showwarning("Advertencia","Error usuario o contraseña incorrectos")
             
@@ -72,10 +75,10 @@ class App:
         segunda_ventana = CTkToplevel(self.root)
         Ventana_Registro(segunda_ventana, self.root)
     
-    def Mostrar_Menu_Clientes(self):
+    def Mostrar_Menu_Clientes(self,dni_cliente):
         self.root.withdraw()
         ventana_clientes = CTkToplevel(self.root)
-        Ventana_Clientes(ventana_clientes, self.root)
+        Ventana_Clientes(ventana_clientes, self.root,dni_cliente)
 
 
         

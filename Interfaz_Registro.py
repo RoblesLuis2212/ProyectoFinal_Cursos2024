@@ -53,7 +53,7 @@ class Ventana_Registro:
         
         self.entry_telefono.place(x=100,y=300)
 
-        opciones = ["RED DE SEGURO MEDICO","SANCOR SALUD","PAMI","OSMEDICA","NINGUNA"]
+        opciones = ["RED DE SEGURO","SANCOR SALUD","PAMI","OSMEDICA","NINGUNA"]
         self.list_obrasocial = CTkOptionMenu(root,values=opciones,width=200,height=35,fg_color="blue2")
 
         self.list_obrasocial.place(x=100,y=400)
