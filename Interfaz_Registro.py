@@ -99,16 +99,21 @@ class Ventana_Registro:
                 messagebox.showwarning("Advertencia","Por favor complete todos los campos")
                 return
             
+            query_usuarios = "INSERT INTO Usuarios (Username,Contraseña,Rol) VALUES (%s,%s,%s)"
+            rol = 1
+            bd.Insertar_Datos(query_usuarios,(username,contraseña_cifrada,rol))
+
+            id_usuario = bd.Obtener_Id_Usuario()
+
+            query_usuarios = "INSERT INTO Clientes(id_usuario,Nombre,Apellido,Direccion,Telefono,DNI,Obra_Social) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+            bd.Insertar_Datos(query_usuarios,(id_usuario,nombre,apellido,direccion,telefono,DNI,obra_social))
+
             #Habilitar linea para verificacion de datos correctos
             
             # for i in lista_datos:
             #     if len(i) < 3:
             #         messagebox.showwarning("Advertencia","Por favor ingrese datos validos")
             #         return
-            
-            query = "INSERT INTO Clientes (Nombre,Apellido,Direccion,Telefono,DNI,Obra_Social,Username,Contraseña) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
-
-            bd.Insertar_Datos(query,(nombre,apellido,direccion,telefono,DNI,obra_social,username,contraseña_cifrada))
             messagebox.showinfo("Registro",f"Registro Realizado Correctamente \nsu username es: {username}")
             self.Limpiar_Campos()
             self.Retroceder_Ventana()
@@ -119,7 +124,8 @@ class Ventana_Registro:
         
         finally:
             bd.CerrarConexion()
-    
+
+
     def Retroceder_Ventana(self):
         self.root.withdraw()
         self.vtn_secundaria.deiconify()

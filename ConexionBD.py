@@ -68,6 +68,20 @@ class BaseDeDatos():
         except mysql.connector.Error as err:
             print("Error al insertar los datos",err)
 
+    def Obtener_Id_Usuario(self):
+        if self.connection is None is self.cursor in None:
+            print("Error en la conexion")
+            return None
+        
+        try:
+            self.cursor.execute("SELECT LAST_INSERT_ID()")
+            ultimo_id = self.cursor.fetchone()[0]
+            return ultimo_id
+        
+        except mysql.connector.Error as err:
+            print("Error al obtener el ID del usuario",err)
+            return None
+
 
 # bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
 # bd.CrearConexion()

@@ -52,17 +52,25 @@ class App:
             
         bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
 
+        #Se crea la conexion con la base de datos
         bd.CrearConexion()
-        query = "SELECT DNI,Username,Contraseña FROM Clientes WHERE Username = %s AND Contraseña = %s"
-        
+        #Se realiza un JOIN para poder obtener tanto el username,contraseña y rol 
+        query = "SELECT u.Rol, c.DNI FROM Usuarios u JOIN Clientes c ON u.id_usuario = c.id_usuario WHERE u.Username = %s AND u.Contraseña = %s"
+
         resultados = bd.ObtenerDatos(query,(usuario,clave_cifrada))
 
 
             
         if resultados:
-            dni_cliente = resultados[0][0]
-            messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
-            self.Mostrar_Menu_Clientes(dni_cliente)
+            rol = resultados[0][0]
+            dni_cliente = resultados[0][1]
+            if rol == 1:
+                messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
+                self.Mostrar_Menu_Clientes(dni_cliente)
+            elif rol == 2:    
+                messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
+            elif rol == 3:
+                messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
         else:
             messagebox.showwarning("Advertencia","Error usuario o contraseña incorrectos")
             
