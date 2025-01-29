@@ -4,16 +4,17 @@ from tkinter import messagebox
 from PIL import Image,ImageTk
 from ConexionBD import BaseDeDatos
 from tkinter import ttk
+import datetime
 
 class Ventana_Clientes:
     def __init__(self,root,vtn_clientes,dni_cliente):
         self.root = root
+        self.dni_cliente = dni_cliente
         self.root.title("Ventana Clientes")
         self.root.geometry("1200x500")
         self.root.resizable(0,0)
 
         self.vtn_clientes = vtn_clientes
-
 
         bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
 
@@ -50,7 +51,7 @@ class Ventana_Clientes:
         self.label_obrasocial = CTkLabel(self.frame_lateral,text=f"Obra Social: {resultados[0][3]}",text_color="black",font=("Comic Sans MS",15))
         self.label_obrasocial.place(x=30,y=280)
 
-        self.boton_salir = CTkButton(self.frame_lateral,text="SALIR",fg_color="green2",text_color="black")
+        self.boton_salir = CTkButton(self.frame_lateral,text="SALIR",fg_color="blue",text_color="white",command=self.Salir_Ventana)
         self.boton_salir.place(x=30,y=420)
 
         self.imagen.image = imagen_tk
@@ -92,19 +93,73 @@ class Ventana_Clientes:
         self.boton_eliminar = CTkButton(self.root,text="Eliminar",fg_color="blue",command=self.Eliminar_Producto)
         self.boton_eliminar.place(x=400,y=250)
 
+        
+        self.label_montoFinal = CTkLabel(self.root,text=f"Monto a pagar:",text_color="white",font=("verdana",30))
+        self.label_montoFinal.place(x=260,y=420)
+
+        self.boton_finalizar = CTkButton(self.root,text="Finalizar Compra",fg_color="blue",text_color="white",width=70,height=30,command=self.Finalizar_Compra)
+        self.boton_finalizar.place(x=800,y=420)
+        
     def Agregar_Producto(self):
         item_seleccionado = self.tree.selection()
         if item_seleccionado:
             medicamento = self.tree.item(item_seleccionado)["values"]
             self.tabla_final.insert("","end",values=(medicamento[0],medicamento[2]))
+            self.Calcular_Total()
         else:
             messagebox.showwarning("Advertencia","Por favor seleccione un medicamento")
+    
     def Eliminar_Producto(self):
         item = self.tabla_final.selection()
         if item:
             medicamento = self.tabla_final.item(item)["values"]
             self.tabla_final.delete(item)
+            self.Calcular_Total()
         else:
             messagebox.showwarning("Advertencia","Por favor seleccione el medicamento a eliminar")
     
+    def Calcular_Total(self):
+        total = 0
+        for item in self.tabla_final.get_children():
+            precio = float(self.tabla_final.item(item)["values"][1])
+            total += precio
+        self.label_montoFinal.configure(text=f"Monto a pagar: {total}")
+        return total
+    
+    def Finalizar_Compra(self):
+        dni_cliente = self.dni_cliente
+        total = 0
+        for item in self.tabla_final.get_children():
+            precio = float(self.tabla_final.item(item)["values"][1])
+            total += precio
+        if total == 0:
+            messagebox.showwarning("Advertencia","No hay productos seleccionados para finalizar la compra")
+            return
         
+        bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+        bd.CrearConexion()
+
+        
+        query_id = "SELECT id_cliente FROM Clientes WHERE DNI = %s"
+        id_cliente = bd.ObtenerDatos(query_id,(dni_cliente,))
+        
+        if id_cliente:
+            id_cliente = id_cliente[0][0]
+            query = "INSERT INTO Pedidos(Fecha_Pedido,Total,Estado,id_cliente) VALUES (%s,%s,%s,%s)"
+            params = (datetime.date.today(),total,'Pendiente',id_cliente)
+
+            bd.Insertar_Datos(query,params)
+
+            query_id_pedido = "SELECT LAST_INSERT_ID()"
+            id_pedido = bd.ObtenerDatos(query_id_pedido,())[0][0]
+
+            messagebox.showinfo("Compra Finalizada",f"Compra finalizada con exito el monto a pagar es {total}")
+            messagebox.showinfo("Compra Finalizada",f"Su codigo para retirar el pedido es: {id_pedido}")
+            self.tabla_final.delete(*self.tabla_final.get_children())
+            self.Calcular_Total()
+    
+    def Salir_Ventana(self):
+        opcion = messagebox.askokcancel("Salir","¿Esta seguro que desea salir del programa?")
+
+        if opcion:
+            sys.exit()
