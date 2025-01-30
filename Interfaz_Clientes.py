@@ -129,9 +129,23 @@ class Ventana_Clientes:
     def Finalizar_Compra(self):
         dni_cliente = self.dni_cliente
         total = 0
+        productos_seleccionados= {}
+
+
         for item in self.tabla_final.get_children():
+            nombre_medicamento = self.tabla_final.item(item)["values"][0]
             precio = float(self.tabla_final.item(item)["values"][1])
             total += precio
+
+        if nombre_medicamento in productos_seleccionados:
+            productos_seleccionados[nombre_medicamento]["cantidad"] += 1
+        else:
+            productos_seleccionados[nombre_medicamento] = {
+                "cantidad" : 1,
+                "precio" : precio
+            }
+
+
         if total == 0:
             messagebox.showwarning("Advertencia","No hay productos seleccionados para finalizar la compra")
             return
@@ -152,6 +166,18 @@ class Ventana_Clientes:
 
             query_id_pedido = "SELECT LAST_INSERT_ID()"
             id_pedido = bd.ObtenerDatos(query_id_pedido,())[0][0]
+
+        #Insertar productos en detalle pedidos con sus cantidades
+        for nombre_medicamento,datos in productos_seleccionados.items():
+            print(f"Medicamento: {nombre_medicamento}, Cantidad: {datos['cantidad']}")
+            query_medicamento = "SELECT id_medicamento FROM Medicamentos WHERE Nombre = %s"
+            id_medicamento = bd.ObtenerDatos(query_medicamento,(nombre_medicamento,))[0][0]
+
+            #Insertar en la tabla detalle pedidos
+            query_detalle = "INSERT INTO Detalle_Pedidos (Cantidad,id_pedido,id_medicamento) VALUES (%s,%s,%s)"
+            params_detalle = (datos["cantidad"],id_pedido,id_medicamento)
+            bd.Insertar_Datos(query_detalle,(params_detalle))
+        
 
             messagebox.showinfo("Compra Finalizada",f"Compra finalizada con exito el monto a pagar es {total}")
             messagebox.showinfo("Compra Finalizada",f"Su codigo para retirar el pedido es: {id_pedido}")
