@@ -137,13 +137,13 @@ class Ventana_Clientes:
             precio = float(self.tabla_final.item(item)["values"][1])
             total += precio
 
-        if nombre_medicamento in productos_seleccionados:
-            productos_seleccionados[nombre_medicamento]["cantidad"] += 1
-        else:
-            productos_seleccionados[nombre_medicamento] = {
-                "cantidad" : 1,
-                "precio" : precio
-            }
+            if nombre_medicamento in productos_seleccionados:
+                productos_seleccionados[nombre_medicamento]["cantidad"] += 1
+            else:
+                productos_seleccionados[nombre_medicamento] = {
+                    "cantidad" : 1,
+                    "precio" : precio
+                }
 
 
         if total == 0:
@@ -179,10 +179,10 @@ class Ventana_Clientes:
             bd.Insertar_Datos(query_detalle,(params_detalle))
         
 
-            messagebox.showinfo("Compra Finalizada",f"Compra finalizada con exito el monto a pagar es {total}")
-            messagebox.showinfo("Compra Finalizada",f"Su codigo para retirar el pedido es: {id_pedido}")
-            self.tabla_final.delete(*self.tabla_final.get_children())
-            self.Calcular_Total()
+        messagebox.showinfo("Compra Finalizada",f"Compra finalizada con exito el monto a pagar es {total}")
+        messagebox.showinfo("Compra Finalizada",f"Su codigo para retirar el pedido es: {id_pedido}")
+        self.tabla_final.delete(*self.tabla_final.get_children())
+        self.Calcular_Total()
     
     def Salir_Ventana(self):
         opcion = messagebox.askokcancel("Salir","¿Esta seguro que desea salir del programa?")

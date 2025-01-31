@@ -41,11 +41,13 @@ class App:
     
     #Esta funcion validara los datos del formulario para poder iniciar sesion
     def ValidarDatos(self):
+        #Se obtienen los datos ingresados en los entry
         usuario = self.entry_username.get()
         contraseña = self.entry_contraseña.get()
-
+        #a la contraseña ingresada es cifrada y comparada con la de la base de datos mediante la consulta
         clave_cifrada = Cifrar_Contraseña(contraseña)
-            
+
+        #se valida que los campos no esten vacios    
         if not usuario or not contraseña:
             messagebox.showwarning("Advertencia","Por favor complete todos los campos")
             return
@@ -59,8 +61,7 @@ class App:
 
         resultados = bd.ObtenerDatos(query,(usuario,clave_cifrada))
 
-
-            
+        #Dependiendo del rol obtenido de la base de datos se muestra la ventana correspondiente            
         if resultados:
             rol = resultados[0][0]
             dni_cliente = resultados[0][1]
@@ -76,6 +77,7 @@ class App:
             
         bd.CerrarConexion()
     
+    #Metodo para ocultar ventanas
     def Mostrar_Ventana(self):
         from Interfaz_Registro import Ventana_Registro 
         self.root.withdraw()
@@ -83,6 +85,7 @@ class App:
         segunda_ventana = CTkToplevel(self.root)
         Ventana_Registro(segunda_ventana, self.root)
     
+    #Muestra el menu correspondiente a los clientes (se ve en el nombre del metodo no hace falta comentarlo)
     def Mostrar_Menu_Clientes(self,dni_cliente):
         self.root.withdraw()
         ventana_clientes = CTkToplevel(self.root)
