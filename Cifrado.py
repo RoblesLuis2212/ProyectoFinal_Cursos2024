@@ -39,3 +39,7 @@ def Descifrar_Contraseña(clave):
 # texto = input("Ingrese el texto a descrifrar: ")
 # texto_descifrado = Descifrar_Contraseña(texto)
 # print(texto_descifrado)
+
+texto = "boquita"
+texto_cifrafo = Cifrar_Contraseña(texto)
+print(texto_cifrafo)

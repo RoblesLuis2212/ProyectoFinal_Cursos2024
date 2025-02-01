@@ -5,6 +5,7 @@ from ConexionBD import BaseDeDatos
 from Interfaz_Clientes import Ventana_Clientes
 from PIL import Image,ImageTk
 from Cifrado import *
+from Interfaz_Gerente import Ventana_Gerente
 
 
 class App:
@@ -57,7 +58,7 @@ class App:
         #Se crea la conexion con la base de datos
         bd.CrearConexion()
         #Se realiza un JOIN para poder obtener tanto el username,contraseña y rol 
-        query = "SELECT u.Rol, c.DNI FROM Usuarios u JOIN Clientes c ON u.id_usuario = c.id_usuario WHERE u.Username = %s AND u.Contraseña = %s"
+        query = "SELECT u.Rol, c.DNI FROM Usuarios u LEFT JOIN Clientes c ON u.id_usuario = c.id_usuario WHERE u.Username = %s AND u.Contraseña = %s"
 
         resultados = bd.ObtenerDatos(query,(usuario,clave_cifrada))
 
@@ -72,6 +73,7 @@ class App:
                 messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
             elif rol == 3:
                 messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
+                self.Mostrar_Menu_Gerente(rol)
         else:
             messagebox.showwarning("Advertencia","Error usuario o contraseña incorrectos")
             
@@ -90,6 +92,11 @@ class App:
         self.root.withdraw()
         ventana_clientes = CTkToplevel(self.root)
         Ventana_Clientes(ventana_clientes, self.root,dni_cliente)
+    
+    def Mostrar_Menu_Gerente(self,rol):
+        self.root.withdraw()
+        ventana_gerente = CTkToplevel(self.root)
+        Ventana_Gerente(ventana_gerente,self.root,rol)
 
 
         

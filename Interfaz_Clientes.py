@@ -93,6 +93,11 @@ class Ventana_Clientes:
         self.boton_eliminar = CTkButton(self.root,text="Eliminar",fg_color="blue",command=self.Eliminar_Producto)
         self.boton_eliminar.place(x=400,y=250)
 
+        metodos_pago = ("Efectivo","Debito","Credito")
+        self.lista_metodopago = CTkOptionMenu(self.root,values=metodos_pago,width=200,height=35,fg_color="blue")
+        self.lista_metodopago.place(x=800,y=350)
+        self.lista_metodopago.set("Seleccionar Metodo De Pago")
+
         
         self.label_montoFinal = CTkLabel(self.root,text=f"Monto a pagar:",text_color="white",font=("verdana",30))
         self.label_montoFinal.place(x=260,y=420)
@@ -130,6 +135,7 @@ class Ventana_Clientes:
         dni_cliente = self.dni_cliente
         total = 0
         productos_seleccionados= {}
+        metodo_pago = self.lista_metodopago.get()
 
 
         for item in self.tabla_final.get_children():
@@ -145,7 +151,6 @@ class Ventana_Clientes:
                     "precio" : precio
                 }
 
-
         if total == 0:
             messagebox.showwarning("Advertencia","No hay productos seleccionados para finalizar la compra")
             return
@@ -159,8 +164,8 @@ class Ventana_Clientes:
         
         if id_cliente:
             id_cliente = id_cliente[0][0]
-            query = "INSERT INTO Pedidos(Fecha_Pedido,Total,Estado,id_cliente) VALUES (%s,%s,%s,%s)"
-            params = (datetime.date.today(),total,'Pendiente',id_cliente)
+            query = "INSERT INTO Pedidos(Fecha_Pedido,Total,Estado,Metodo_Pago,id_cliente) VALUES (%s,%s,%s,%s,%s)"
+            params = (datetime.date.today(),total,'Pendiente',metodo_pago,id_cliente)
 
             bd.Insertar_Datos(query,params)
 
