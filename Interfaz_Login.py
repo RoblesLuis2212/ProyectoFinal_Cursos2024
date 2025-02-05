@@ -12,7 +12,7 @@ class App:
     def __init__(self,root):
         self.root = root
         self.root.geometry("400x500")
-        self.root.title("Prototipo Proyecto")
+        self.root.title("Iniciar Sesión")
         self.root.resizable(0,0)   
         
         set_appearance_mode("dark")
