@@ -61,7 +61,7 @@ class Ventana_Gerente:
         self.boton_stock.place(x=100,y=190,width=320,height=70)
 
 
-        self.boton_empleados = Button(self.root,text="ABM Empleados")
+        self.boton_empleados = Button(self.root,text="ABM Empleados",command=self.Ventana_ABM_Empleados)
         self.boton_empleados.config(image=imagen_empleadosTk,compound=LEFT,padx=15)
         self.boton_empleados.image = imagen_empleadosTk
         self.boton_empleados.place(x=100,y=260,width=320,height=70)
@@ -121,7 +121,6 @@ class Ventana_Gerente:
         def Retroceder():
             self.root.deiconify()
             ventana_ABM_Productos.destroy()
-
 
         self.root.withdraw()
         ventana_ABM_Productos = CTkToplevel()
@@ -194,7 +193,92 @@ class Ventana_Gerente:
         tabla.column("Categoria",width=130,anchor="center")
 
         tabla.place(x=255,y=10)
+    
+    def Ventana_ABM_Empleados(self):
 
+        def Retroceder():
+            self.root.deiconify()
+            vtn_ABM_Empleados.destroy()
+        
+        self.root.withdraw()
+        vtn_ABM_Empleados = CTkToplevel()
+        vtn_ABM_Empleados.title("ABM Empleados")
+        vtn_ABM_Empleados.geometry("920x500")
+        vtn_ABM_Empleados.resizable(0,0)
+        
+        frame_titulo = CTkFrame(vtn_ABM_Empleados,fg_color="black",width=250,height=500)
+        frame_titulo.place(x=0)
+
+        titulo = CTkLabel(frame_titulo,text="Agregar Nuevos Empleados",font=("Lato",20))
+        titulo.place(x=5,y=5)
+
+        label_nombre = CTkLabel(frame_titulo,text="NOMBRE",font=("Rod",15,"bold"))
+        label_nombre.place(x=20,y=40)
+        
+        entry_nombre = Entry(frame_titulo)
+        entry_nombre.place(x=100,y=40)
+
+        label_apellido = CTkLabel(frame_titulo,text="APELLIDO",font=("Rod",15,"bold"))
+        label_apellido.place(x=20,y=75)
+
+        entry_apellido = Entry(frame_titulo)
+        entry_apellido.place(x=100,y=80)
+
+        label_direccion = CTkLabel(frame_titulo,text="DIRECCION",font=("Rod",15,"bold"))
+        label_direccion.place(x=10,y=115)
+
+        entry_direccion = Entry(frame_titulo)
+        entry_direccion.place(x=100,y=115)
+
+        label_telefono = CTkLabel(frame_titulo,text="TELEFONO",font=("Rod",15,"bold"))
+        label_telefono.place(x=10,y=150)
+
+        entry_categoria = Entry(frame_titulo)
+        entry_categoria.place(x=100,y=155)
+
+        label_sueldo = CTkLabel(frame_titulo,text="SUELDO",font=("Rod",15,"bold"))
+        label_sueldo.place(x=20,y=190)
+
+        entry_sueldo = Entry(frame_titulo)
+        entry_sueldo.place(x=100,y=195)
+
+
+        # boton_agregar = Button(frame_titulo,text="Agregar",background="red",font="black")
+        # boton_agregar.place(x=10,y=200)
+
+        # boton_modificar = Button(frame_titulo,text="Modificar",background="yellow",font="black")
+        # boton_modificar.place(x=90,y=200)
+
+        # boton_eliminar = Button(frame_titulo,text="Eliminar",background="green2",font="black")
+        # boton_eliminar.place(x=180,y=200)
+        
+        # entry_busqueda = Entry(frame_titulo)
+        # entry_busqueda.place(x=60,y=290)
+
+        # boton_buscar = Button(frame_titulo,text="Buscar Por Nombre",background="orange",font="black")
+        # boton_buscar.place(x=50,y=245)
+
+        # boton_salir = Button(frame_titulo,text="Atrás",background="VioletRed1",font="black",command=Retroceder)
+        # boton_salir.place(x=100,y=360)
+
+        #Creacion de la tabla para visualizar los datos
+        columnas = ("Nombre","Apellido","Direccion","Telefono","Sueldo")
+        tabla = ttk.Treeview(vtn_ABM_Empleados,columns=columnas,show="headings",height=25)
+
+        tabla.heading("Nombre",text="Nombre")
+        tabla.heading("Apellido",text="Apellido")
+        tabla.heading("Direccion",text="Direccion")
+        tabla.heading("Telefono",text="Telefono")
+        tabla.heading("Sueldo",text="Sueldo")
+
+
+        tabla.column("Nombre",width=130,anchor="center")
+        tabla.column("Apellido",width=130,anchor="center")
+        tabla.column("Direccion",width=130,anchor="center")
+        tabla.column("Telefono",width=130,anchor="center")
+        tabla.column("Sueldo",width=130,anchor="center")
+
+        tabla.place(x=255,y=10)
 
     def Salir(self):
         opcion = messagebox.askokcancel("Salir","¿Esta seguro de que desea salir?")
