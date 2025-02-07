@@ -5,6 +5,7 @@ from ConexionBD import BaseDeDatos
 from tkinter import ttk
 from PIL import Image,ImageTk
 from Interfaz_Login import Ventana_Clientes
+from tkinter import ttk
 
 class Ventana_Gerente:
     def __init__(self,root,rol,vtn_gerente):
@@ -54,7 +55,7 @@ class Ventana_Gerente:
         self.boton_usuario.image = imagen_tk
         self.boton_usuario.place(x=100,y=120,width=320,height=70)
 
-        self.boton_stock = Button(self.root,text="ABM Productos")
+        self.boton_stock = Button(self.root,text="ABM Productos",command=self.Ventana_ABM_Productos)
         self.boton_stock.config(image=imagen_tkStock,compound=LEFT,padx=20)
         self.boton_stock.image = imagen_tkStock
         self.boton_stock.place(x=100,y=190,width=320,height=70)
@@ -113,6 +114,86 @@ class Ventana_Gerente:
 
         boton_atras = CTkButton(ventana_RC,text="Atrás",fg_color="blue2",text_color="white",height=40,width=200,font=("Arial",14),command=Retroceder)
         boton_atras.place(x=100,y=245)
+    
+    #Ventana para implementar el ABM del productos
+    def Ventana_ABM_Productos(self):
+
+        def Retroceder():
+            self.root.deiconify()
+            ventana_ABM_Productos.destroy()
+
+
+        self.root.withdraw()
+        ventana_ABM_Productos = CTkToplevel()
+        ventana_ABM_Productos.title("ABM Productos")
+        ventana_ABM_Productos.geometry("800x500")
+        ventana_ABM_Productos.resizable(0,0)
+
+
+        frame_titulo = CTkFrame(ventana_ABM_Productos,fg_color="navy",width=250,height=500)
+        frame_titulo.place(x=0)
+
+        titulo = CTkLabel(frame_titulo,text="Agregar Nuevos Productos",font=("Lato",20))
+        titulo.place(x=10,y=5)
+
+        label_nombre = CTkLabel(frame_titulo,text="NOMBRE",font=("Rod",15,"bold"))
+        label_nombre.place(x=20,y=40)
+        
+        entry_nombre = Entry(frame_titulo)
+        entry_nombre.place(x=100,y=40)
+
+        label_descripcion = CTkLabel(frame_titulo,text="Descripcion",font=("Rod",15,"bold"))
+        label_descripcion.place(x=10,y=75)
+
+        entry_descripcion = Entry(frame_titulo)
+        entry_descripcion.place(x=100,y=80)
+
+        label_precio = CTkLabel(frame_titulo,text="Precio",font=("Rod",15,"bold"))
+        label_precio.place(x=20,y=115)
+
+        entry_precio = Entry(frame_titulo)
+        entry_precio.place(x=100,y=115)
+
+        label_categoria = CTkLabel(frame_titulo,text="Categoria",font=("Rod",15,"bold"))
+        label_categoria.place(x=10,y=150)
+
+        entry_categoria = Entry(frame_titulo)
+        entry_categoria.place(x=100,y=155)
+
+        boton_agregar = Button(frame_titulo,text="Agregar",background="red",font="black")
+        boton_agregar.place(x=10,y=200)
+
+        boton_modificar = Button(frame_titulo,text="Modificar",background="yellow",font="black")
+        boton_modificar.place(x=90,y=200)
+
+        boton_eliminar = Button(frame_titulo,text="Eliminar",background="green2",font="black")
+        boton_eliminar.place(x=180,y=200)
+        
+        entry_busqueda = Entry(frame_titulo)
+        entry_busqueda.place(x=60,y=290)
+
+        boton_buscar = Button(frame_titulo,text="Buscar Por Nombre",background="orange",font="black")
+        boton_buscar.place(x=50,y=245)
+
+        boton_salir = Button(frame_titulo,text="Atrás",background="VioletRed1",font="black",command=Retroceder)
+        boton_salir.place(x=100,y=360)
+
+        #Creacion de la tabla para visualizar los datos
+        columnas = ("Nombre","Descripcion","Precio","Categoria")
+        tabla = ttk.Treeview(ventana_ABM_Productos,columns=columnas,show="headings",height=25)
+
+        tabla.heading("Nombre",text="Nombre")
+        tabla.heading("Descripcion",text="Descripcion")
+        tabla.heading("Precio",text="Precio")
+        tabla.heading("Categoria",text="Categoria")
+
+
+        tabla.column("Nombre",width=130,anchor="center")
+        tabla.column("Descripcion",width=130,anchor="center")
+        tabla.column("Precio",width=130,anchor="center")
+        tabla.column("Categoria",width=130,anchor="center")
+
+        tabla.place(x=255,y=10)
 
 
     def Salir(self):
