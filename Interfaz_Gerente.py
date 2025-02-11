@@ -6,6 +6,7 @@ from tkinter import ttk
 from PIL import Image,ImageTk
 from Interfaz_Login import Ventana_Clientes
 from tkinter import ttk
+from Cifrado import *
 
 class Ventana_Gerente:
     def __init__(self,root,rol,vtn_gerente):
@@ -81,8 +82,6 @@ class Ventana_Gerente:
         self.boton_salir.image = imagen_salirTK
         self.boton_salir.place(x=100,y=470,width=320,height=70)
 
-
-
     #Esta es la ventana para restablacer las contraseñas
     def Ventana_Contraseñas(self):
 
@@ -105,7 +104,7 @@ class Ventana_Gerente:
 
         entry_usuario = CTkEntry(ventana_RC,width=200,height=40,
                                        font=("Arial",16),
-                                       placeholder_text="username",
+                                       placeholder_text="DNI",
                                        placeholder_text_color="gray",border_color="blue2")
         entry_usuario.place(x=100,y=150)
 
@@ -196,6 +195,8 @@ class Ventana_Gerente:
     
     def Ventana_ABM_Empleados(self):
 
+        bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+
         def Retroceder():
             self.root.deiconify()
             vtn_ABM_Empleados.destroy()
@@ -203,7 +204,7 @@ class Ventana_Gerente:
         self.root.withdraw()
         vtn_ABM_Empleados = CTkToplevel()
         vtn_ABM_Empleados.title("ABM Empleados")
-        vtn_ABM_Empleados.geometry("920x500")
+        vtn_ABM_Empleados.geometry("1050x500")
         vtn_ABM_Empleados.resizable(0,0)
         
         frame_titulo = CTkFrame(vtn_ABM_Empleados,fg_color="black",width=250,height=500)
@@ -233,42 +234,48 @@ class Ventana_Gerente:
         label_telefono = CTkLabel(frame_titulo,text="TELEFONO",font=("Rod",15,"bold"))
         label_telefono.place(x=10,y=150)
 
-        entry_categoria = Entry(frame_titulo)
-        entry_categoria.place(x=100,y=155)
+        entry_telefono = Entry(frame_titulo)
+        entry_telefono.place(x=100,y=155)
 
+        label_dni = CTkLabel(frame_titulo,text="DNI",font=("Rod",15,"bold"))
+        label_dni.place(x=45,y=190)
+
+        entry_dni = Entry(frame_titulo)
+        entry_dni.place(x=100,y=190)
+        
         label_sueldo = CTkLabel(frame_titulo,text="SUELDO",font=("Rod",15,"bold"))
-        label_sueldo.place(x=20,y=190)
+        label_sueldo.place(x=20,y=230)
 
         entry_sueldo = Entry(frame_titulo)
-        entry_sueldo.place(x=100,y=195)
+        entry_sueldo.place(x=100,y=230)
 
+        boton_agregar = Button(frame_titulo,text="Agregar",background="red",font="black")
+        boton_agregar.place(x=10,y=270)
 
-        # boton_agregar = Button(frame_titulo,text="Agregar",background="red",font="black")
-        # boton_agregar.place(x=10,y=200)
+        boton_modificar = Button(frame_titulo,text="Modificar",background="yellow",font="black")
+        boton_modificar.place(x=90,y=270)
 
-        # boton_modificar = Button(frame_titulo,text="Modificar",background="yellow",font="black")
-        # boton_modificar.place(x=90,y=200)
-
-        # boton_eliminar = Button(frame_titulo,text="Eliminar",background="green2",font="black")
-        # boton_eliminar.place(x=180,y=200)
+        boton_eliminar = Button(frame_titulo,text="Eliminar",background="green2",font="black")
+        boton_eliminar.place(x=180,y=270)
         
-        # entry_busqueda = Entry(frame_titulo)
-        # entry_busqueda.place(x=60,y=290)
+        entry_busqueda = Entry(frame_titulo)
+        entry_busqueda.place(x=70,y=310)
 
-        # boton_buscar = Button(frame_titulo,text="Buscar Por Nombre",background="orange",font="black")
-        # boton_buscar.place(x=50,y=245)
+        boton_buscar = Button(frame_titulo,text="Buscar Por Nombre",background="orange",font="black")
+        boton_buscar.place(x=50,y=340)
 
-        # boton_salir = Button(frame_titulo,text="Atrás",background="VioletRed1",font="black",command=Retroceder)
-        # boton_salir.place(x=100,y=360)
+        boton_atras = Button(frame_titulo,text="Atrás",background="VioletRed1",font="black",command=Retroceder)
+        boton_atras.place(x=100,y=400)
 
         #Creacion de la tabla para visualizar los datos
-        columnas = ("Nombre","Apellido","Direccion","Telefono","Sueldo")
+        columnas = ("Nombre","Apellido","Direccion","Telefono","DNI","Sueldo")
         tabla = ttk.Treeview(vtn_ABM_Empleados,columns=columnas,show="headings",height=25)
 
         tabla.heading("Nombre",text="Nombre")
         tabla.heading("Apellido",text="Apellido")
         tabla.heading("Direccion",text="Direccion")
         tabla.heading("Telefono",text="Telefono")
+        tabla.heading("DNI",text="DNI")
         tabla.heading("Sueldo",text="Sueldo")
 
 
@@ -276,9 +283,26 @@ class Ventana_Gerente:
         tabla.column("Apellido",width=130,anchor="center")
         tabla.column("Direccion",width=130,anchor="center")
         tabla.column("Telefono",width=130,anchor="center")
+        tabla.column("DNI",width=130,anchor="center")
         tabla.column("Sueldo",width=130,anchor="center")
 
         tabla.place(x=255,y=10)
+
+        #Consulta para mostrar los datos en la tabla
+        bd.CrearConexion()
+        query = "SELECT Nombre,Apellido,Direccion,Telefono,DNI,Sueldo FROM Empleados"
+        resultados = bd.ObtenerDatos(query,())
+
+        if resultados:
+            for resultado in resultados:
+                tabla.insert("","end",values=resultado)
+        else:
+            print("Datos no encontrados en la tabla")
+        
+
+
+
+
 
     def Salir(self):
         opcion = messagebox.askokcancel("Salir","¿Esta seguro de que desea salir?")
