@@ -51,7 +51,7 @@ class Ventana_Gerente:
         imagen_salirR = imagen_salir.resize((40,40))
         imagen_salirTK = ImageTk.PhotoImage(imagen_salirR)
 
-        self.boton_usuario = Button(self.root,text="Usuarios",font=("Arial",10))
+        self.boton_usuario = Button(self.root,text="Usuarios",font=("Arial",10),command=self.Ventana_Usuarios)
         self.boton_usuario.config(image=imagen_tk,compound=LEFT,padx=50)
         self.boton_usuario.image = imagen_tk
         self.boton_usuario.place(x=100,y=120,width=320,height=70)
@@ -299,10 +299,42 @@ class Ventana_Gerente:
         else:
             print("Datos no encontrados en la tabla")
         
+    def Ventana_Usuarios(self):
 
+        def Retroceder():
+            self.root.deiconify()
+            vtn_usuario.destroy()
 
+        self.root.withdraw()
 
+        vtn_usuario = CTkToplevel()
+        vtn_usuario.title("Usuarios")
+        vtn_usuario.geometry("400x500")
+        vtn_usuario.resizable(0,0)
 
+        frame_titulo = CTkFrame(vtn_usuario,fg_color="blue",width=400,height=80)
+        frame_titulo.place(x=0)
+
+        label_titulo = CTkLabel(frame_titulo,text="Registro de datos",font=("verdana",25,"bold"))
+        label_titulo.place(x=80,y=20)
+
+        entry_username = CTkEntry(vtn_usuario,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Username",
+                                       placeholder_text_color="gray",border_color="blue2")
+        entry_username.place(x=100,y=120)
+
+        entry_contraseña = CTkEntry(vtn_usuario,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Contraseña",
+                                       placeholder_text_color="gray",border_color="blue2")
+        entry_contraseña.place(x=100,y=170)
+
+        boton_registrar = CTkButton(vtn_usuario,text="registrar",fg_color="blue",width=200,height=40,font=("arial",15,"bold"))
+        boton_registrar.place(x=100,y=220)
+
+        boton_atras = CTkButton(vtn_usuario,text="Atrás",fg_color="blue",width=200,height=40,font=("arial",15,"bold"),command=Retroceder)
+        boton_atras.place(x=100,y=270)
 
     def Salir(self):
         opcion = messagebox.askokcancel("Salir","¿Esta seguro de que desea salir?")
