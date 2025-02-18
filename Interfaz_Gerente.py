@@ -195,6 +195,44 @@ class Ventana_Gerente:
     
     def Ventana_ABM_Empleados(self):
 
+        def Limpiar_Campos():
+            entry_nombre.delete(0,END)
+            entry_apellido.delete(0,END)
+            entry_direccion.delete(0,END)
+            entry_telefono.delete(0,END)
+            entry_dni.delete(0,END)
+            entry_sueldo.delete(0,END)
+            entry_idUsuario.delete(0,END)
+
+
+        def Agregar_Usuario():
+            id = entry_idUsuario.get()
+            nombre = entry_nombre.get()
+            apellido = entry_apellido.get()
+            direccion = entry_direccion.get()
+            telefono = entry_telefono.get()
+            dni = entry_dni.get()
+            sueldo = entry_sueldo.get()
+
+            try:
+
+                bd.CrearConexion()
+                if not nombre or not apellido or not direccion or not telefono or not dni or not sueldo:
+                    messagebox.showwarning("Advertencia!","Por favor complete todo los campos")
+                    return
+            
+                query = "INSERT INTO Empleados (id_usuario,Nombre,Apellido,Direccion,Telefono,DNI,Sueldo) VALUES (%s,%s,%s,%s,%s,%s,%s)"
+
+                bd.Insertar_Datos(query,(id,nombre,apellido,direccion,telefono,dni,sueldo))
+                messagebox.showinfo("Informacion","Datos cargados correctamente")
+                Actualizar_Tabla()
+                Limpiar_Campos()
+            except Exception as e:
+                messagebox.showerror("Error","Se ha producido un error al insertar los datos")
+                print(e)
+            finally:
+                bd.CerrarConexion()
+        
         bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
 
         def Retroceder():
@@ -249,23 +287,29 @@ class Ventana_Gerente:
         entry_sueldo = Entry(frame_titulo)
         entry_sueldo.place(x=100,y=230)
 
-        boton_agregar = Button(frame_titulo,text="Agregar",background="red",font="black")
-        boton_agregar.place(x=10,y=270)
+        label_ID = CTkLabel(frame_titulo,text="ID USUARIO",font=("Rod",15,"bold"))
+        label_ID.place(x=10,y=270)
+
+        entry_idUsuario = Entry(frame_titulo)
+        entry_idUsuario.place(x=100,y=270)
+
+        boton_agregar = Button(frame_titulo,text="Agregar",background="red",font="black",command=Agregar_Usuario)
+        boton_agregar.place(x=10,y=310)
 
         boton_modificar = Button(frame_titulo,text="Modificar",background="yellow",font="black")
-        boton_modificar.place(x=90,y=270)
+        boton_modificar.place(x=90,y=310)
 
         boton_eliminar = Button(frame_titulo,text="Eliminar",background="green2",font="black")
-        boton_eliminar.place(x=180,y=270)
+        boton_eliminar.place(x=180,y=310)
         
         entry_busqueda = Entry(frame_titulo)
-        entry_busqueda.place(x=70,y=310)
+        entry_busqueda.place(x=70,y=350)
 
         boton_buscar = Button(frame_titulo,text="Buscar Por Nombre",background="orange",font="black")
-        boton_buscar.place(x=50,y=340)
+        boton_buscar.place(x=50,y=380)
 
         boton_atras = Button(frame_titulo,text="Atrás",background="VioletRed1",font="black",command=Retroceder)
-        boton_atras.place(x=100,y=400)
+        boton_atras.place(x=100,y=420)
 
         #Creacion de la tabla para visualizar los datos
         columnas = ("Nombre","Apellido","Direccion","Telefono","DNI","Sueldo")
@@ -298,8 +342,54 @@ class Ventana_Gerente:
                 tabla.insert("","end",values=resultado)
         else:
             print("Datos no encontrados en la tabla")
-        
+
+        def Actualizar_Tabla():
+            for i in tabla.get_children():
+                tabla.delete(i)
+            
+            bd.CrearConexion()
+            query = "SELECT Nombre,Apellido,Direccion,Telefono,DNI,Sueldo FROM Empleados"
+            resultados = bd.ObtenerDatos(query,())
+
+            if resultados:
+                for resultado in resultados:
+                    tabla.insert("","end",values=resultado)
+            else:
+                print("Datos no encontrados en la tabla")
+
+    #ventana para el registro de usuarios (empleados)   
     def Ventana_Usuarios(self):
+
+        def Registrar_Usuarios():
+            username = entry_username.get()
+            contraseña = entry_contraseña.get()
+
+            contraseña_cifrada = Cifrar_Contraseña(contraseña)
+
+            bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+
+            try:
+                bd.CrearConexion()
+                if not username or not contraseña:
+                    messagebox.showwarning("Advertencia","Por favor complete todos los campos")
+                    return
+                
+                query = "INSERT INTO Usuarios (Username,Contraseña,Rol) VALUES (%s,%s,%s)"
+                rol = 2
+
+                bd.Insertar_Datos(query,(username,contraseña_cifrada,rol))
+                messagebox.showinfo("Informacion","usuario registrado correctamente")
+
+                id_usuario = bd.Obtener_Id_Usuario()
+
+                messagebox.showinfo("Informacion",f"Su ID de usuario es: {id_usuario}")
+
+                entry_username.delete(0,END)
+                entry_contraseña.delete(0,END)
+            
+            except Exception as e:
+                messagebox.showerror("Error","Se ha producido un error al registar el usuario")
+                print(e)
 
         def Retroceder():
             self.root.deiconify()
@@ -330,7 +420,7 @@ class Ventana_Gerente:
                                        placeholder_text_color="gray",border_color="blue2")
         entry_contraseña.place(x=100,y=170)
 
-        boton_registrar = CTkButton(vtn_usuario,text="registrar",fg_color="blue",width=200,height=40,font=("arial",15,"bold"))
+        boton_registrar = CTkButton(vtn_usuario,text="registrar",fg_color="blue",width=200,height=40,font=("arial",15,"bold"),command=Registrar_Usuarios)
         boton_registrar.place(x=100,y=220)
 
         boton_atras = CTkButton(vtn_usuario,text="Atrás",fg_color="blue",width=200,height=40,font=("arial",15,"bold"),command=Retroceder)
