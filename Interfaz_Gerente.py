@@ -193,8 +193,30 @@ class Ventana_Gerente:
 
         tabla.place(x=255,y=10)
     
+    #Ventana donde se realiza el ABM de empleados
     def Ventana_ABM_Empleados(self):
 
+
+        def Llenar_Campos(event):
+            Limpiar_Campos()
+            seleccion = tabla.focus()
+
+            if seleccion:
+                valores = tabla.item(seleccion,"values")
+
+                for fila in valores:
+                    print(fila)
+
+                entry_nombre.insert(0,valores[0])
+                entry_apellido.insert(0,valores[1])
+                entry_direccion.insert(0,valores[2])
+                entry_telefono.insert(0,valores[3])
+                entry_dni.insert(0,valores[4])
+                entry_sueldo.insert(0,valores[5])
+            else:
+                messagebox.showwarning("Advertencia","Por favor seleccione una fila")
+
+        #Funcion para limpiar los campos pertenecientes a la ventana
         def Limpiar_Campos():
             entry_nombre.delete(0,END)
             entry_apellido.delete(0,END)
@@ -203,8 +225,8 @@ class Ventana_Gerente:
             entry_dni.delete(0,END)
             entry_sueldo.delete(0,END)
             entry_idUsuario.delete(0,END)
-
-
+        
+        #Funcion para agregar usuarios a la base de datos
         def Agregar_Usuario():
             id = entry_idUsuario.get()
             nombre = entry_nombre.get()
@@ -214,12 +236,13 @@ class Ventana_Gerente:
             dni = entry_dni.get()
             sueldo = entry_sueldo.get()
 
-            try:
 
+            #Se verifica mediante el try que los campos no esten vacios antes de enviarlos a la BD
+            try:
                 bd.CrearConexion()
                 if not nombre or not apellido or not direccion or not telefono or not dni or not sueldo:
                     messagebox.showwarning("Advertencia!","Por favor complete todo los campos")
-                    return
+                    return #El return se utiliza para que el programa no siga avanzando en la ejecucion
             
                 query = "INSERT INTO Empleados (id_usuario,Nombre,Apellido,Direccion,Telefono,DNI,Sueldo) VALUES (%s,%s,%s,%s,%s,%s,%s)"
 
@@ -233,12 +256,38 @@ class Ventana_Gerente:
             finally:
                 bd.CerrarConexion()
         
+        
+        def Modificar_Usuario():
+            nombre = entry_nombre.get()
+            apellido = entry_apellido.get()
+            direccion = entry_direccion.get()
+            telefono = entry_telefono.get()
+            dni_empleado = entry_dni.get()
+            sueldo = entry_sueldo.get()
+            
+            if not dni_empleado:
+                    messagebox.showwarning("Advertencia","Error, ingrese un DNI valido")
+                    return
+            
+            try:
+                query = "UPDATE Empleados SET Nombre = %s,Apellido = %s,Direccion = %s,Telefono = %s,DNI = %s,Sueldo = %s WHERE DNI = %s"
+                bd.Insertar_Datos(query,(nombre,apellido,direccion,telefono,dni_empleado,sueldo,dni_empleado))
+                messagebox.showinfo("Informacion","Datos actualizados correctamente")
+                Limpiar_Campos()
+                Actualizar_Tabla()
+            
+            except Exception as err:
+                messagebox.showerror("Error","Error interno al actualizar los datos")
+                Limpiar_Campos()
+
         bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
 
+        #funcion para volver al menu principal
         def Retroceder():
             self.root.deiconify()
             vtn_ABM_Empleados.destroy()
         
+        #Diseño correspondiente a la ventana "ABM Empleados"
         self.root.withdraw()
         vtn_ABM_Empleados = CTkToplevel()
         vtn_ABM_Empleados.title("ABM Empleados")
@@ -296,7 +345,7 @@ class Ventana_Gerente:
         boton_agregar = Button(frame_titulo,text="Agregar",background="red",font="black",command=Agregar_Usuario)
         boton_agregar.place(x=10,y=310)
 
-        boton_modificar = Button(frame_titulo,text="Modificar",background="yellow",font="black")
+        boton_modificar = Button(frame_titulo,text="Modificar",background="yellow",font="black",command=Modificar_Usuario)
         boton_modificar.place(x=90,y=310)
 
         boton_eliminar = Button(frame_titulo,text="Eliminar",background="green2",font="black")
@@ -315,6 +364,7 @@ class Ventana_Gerente:
         columnas = ("Nombre","Apellido","Direccion","Telefono","DNI","Sueldo")
         tabla = ttk.Treeview(vtn_ABM_Empleados,columns=columnas,show="headings",height=25)
 
+        #Se definen los encabezados de las columnas de la tabla
         tabla.heading("Nombre",text="Nombre")
         tabla.heading("Apellido",text="Apellido")
         tabla.heading("Direccion",text="Direccion")
@@ -322,7 +372,7 @@ class Ventana_Gerente:
         tabla.heading("DNI",text="DNI")
         tabla.heading("Sueldo",text="Sueldo")
 
-
+        #Definicion de las columnas de la tabla, tambien se ajustan los tamaños y posiciones
         tabla.column("Nombre",width=130,anchor="center")
         tabla.column("Apellido",width=130,anchor="center")
         tabla.column("Direccion",width=130,anchor="center")
@@ -337,12 +387,14 @@ class Ventana_Gerente:
         query = "SELECT Nombre,Apellido,Direccion,Telefono,DNI,Sueldo FROM Empleados"
         resultados = bd.ObtenerDatos(query,())
 
+        #Apartir de los resultados obtenidos se utiliza un bucle para recorrerlos
         if resultados:
             for resultado in resultados:
                 tabla.insert("","end",values=resultado)
         else:
             print("Datos no encontrados en la tabla")
 
+        #Esta funcion actualiza los datos de la tabla inmediatamente al agregar un nuevo empleado
         def Actualizar_Tabla():
             for i in tabla.get_children():
                 tabla.delete(i)
@@ -356,10 +408,12 @@ class Ventana_Gerente:
                     tabla.insert("","end",values=resultado)
             else:
                 print("Datos no encontrados en la tabla")
+        
+        tabla.bind("<<TreeviewSelect>>",Llenar_Campos)
 
     #ventana para el registro de usuarios (empleados)   
     def Ventana_Usuarios(self):
-
+        #Funcion para registrar los uevos empleados
         def Registrar_Usuarios():
             username = entry_username.get()
             contraseña = entry_contraseña.get()
@@ -384,19 +438,23 @@ class Ventana_Gerente:
 
                 messagebox.showinfo("Informacion",f"Su ID de usuario es: {id_usuario}")
 
+                #Se limpian los campos al registrar correctamente los datos
                 entry_username.delete(0,END)
                 entry_contraseña.delete(0,END)
             
+            #Capturador de errores
             except Exception as e:
                 messagebox.showerror("Error","Se ha producido un error al registar el usuario")
                 print(e)
 
+        #Funcion de retroceder correspondiente a esta ventana
         def Retroceder():
             self.root.deiconify()
             vtn_usuario.destroy()
 
         self.root.withdraw()
 
+        #Diseño de la ventana "Usuarios"
         vtn_usuario = CTkToplevel()
         vtn_usuario.title("Usuarios")
         vtn_usuario.geometry("400x500")
