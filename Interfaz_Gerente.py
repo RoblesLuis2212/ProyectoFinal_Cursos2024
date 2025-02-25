@@ -116,10 +116,93 @@ class Ventana_Gerente:
     
     #Ventana para implementar el ABM del productos
     def Ventana_ABM_Productos(self):
+        def Limpiar_Campos():
+            entry_nombre.delete(0,END)
+            entry_descripcion.delete(0,END)
+            entry_precio.delete(0,END)
+            entry_categoria.delete(0,END)
 
+        def Llenar_Campos(event):
+            Limpiar_Campos()
+            seleccion = tabla.focus()
+            print(seleccion)
+
+            if seleccion:
+                valores = tabla.item(seleccion,"values")
+                print(valores)
+
+                for fila in valores:
+                    print(fila)
+
+                entry_nombre.insert(0,valores[0])
+                entry_descripcion.insert(0,valores[1])
+                entry_precio.insert(0,valores[2])
+                entry_categoria.insert(0,valores[3])
+            
         def Retroceder():
             self.root.deiconify()
             ventana_ABM_Productos.destroy()
+        
+        def Actualizar_Tabla():
+            for i in tabla.get_children():
+                tabla.delete(i)
+            
+            bd.CrearConexion()
+            query = "SELECT Nombre,Descripcion,Precio,Categoria FROM Medicamentos"
+            resultados = bd.ObtenerDatos(query,())
+
+            if resultados:
+                for resultado in resultados:
+                    tabla.insert("","end",values=resultado)
+            else:
+                print("Datos no encontrados en la tabla")
+        
+        def Cargar_Medicamento():
+            bd.CrearConexion()
+
+            nombre = entry_nombre.get()
+            descripcion = entry_descripcion.get()
+            precio = entry_precio.get()
+            categoria = entry_categoria.get()
+
+            try:
+                query = "INSERT INTO Medicamentos (Nombre,Descripcion,Precio,Categoria) VALUES (%s,%s,%s,%s)"
+                bd.Insertar_Datos(query,(nombre,descripcion,precio,categoria))
+                messagebox.showinfo("Informacion","Medicamento cargado correctamente")
+                Actualizar_Tabla()
+                Limpiar_Campos()
+                bd.CerrarConexion()
+            except Exception as err:
+                messagebox.showerror("Error","Error interno al cargar los datos")
+                print(err)
+        
+        def Modificar_Medicamento():
+            seleccion = tabla.focus()
+
+            if seleccion:
+                messagebox.showwarning("Advertencia","Por favor seleccione un medicamento")
+                return
+            
+            query = "UPDATE Medicamentos SET Nombre = %s,Descripcion = %s,Precio = %s,Categoria = %s WHERE id_medicamento = %s"
+        
+
+        def Eliminar_Medicamento():
+            nombre = entry_nombre.get()
+            seleccion = tabla.focus()
+
+            if not seleccion:
+                messagebox.showwarning("Advertencia","Por favor seleccione el medicamento a eliminar")
+                return
+            
+            try:
+                query = "DELETE FROM Medicamentos WHERE Nombre = %s"
+                bd.Insertar_Datos(query,(nombre,))
+                messagebox.showinfo("Informacion","Medicamento eliminado correctamente")
+                Limpiar_Campos()
+                Actualizar_Tabla()
+            except Exception as err:
+                messagebox.showerror("Error","Error interno al eliminar los datos")
+                print(err)
 
         self.root.withdraw()
         ventana_ABM_Productos = CTkToplevel()
@@ -158,23 +241,18 @@ class Ventana_Gerente:
         entry_categoria = Entry(frame_titulo)
         entry_categoria.place(x=100,y=155)
 
-        boton_agregar = Button(frame_titulo,text="Agregar",background="red",font="black")
+        boton_agregar = Button(frame_titulo,text="Agregar",background="red",font="black",command=Cargar_Medicamento)
         boton_agregar.place(x=10,y=200)
 
-        boton_modificar = Button(frame_titulo,text="Modificar",background="yellow",font="black")
+        boton_modificar = Button(frame_titulo,text="Modificar",background="yellow",font="black",command=Modificar_Medicamento)
         boton_modificar.place(x=90,y=200)
 
-        boton_eliminar = Button(frame_titulo,text="Eliminar",background="green2",font="black")
+        boton_eliminar = Button(frame_titulo,text="Eliminar",background="green2",font="black",command=Eliminar_Medicamento)
         boton_eliminar.place(x=180,y=200)
         
-        entry_busqueda = Entry(frame_titulo)
-        entry_busqueda.place(x=60,y=290)
 
-        boton_buscar = Button(frame_titulo,text="Buscar Por Nombre",background="orange",font="black")
-        boton_buscar.place(x=50,y=245)
-
-        boton_salir = Button(frame_titulo,text="Atrás",background="VioletRed1",font="black",command=Retroceder)
-        boton_salir.place(x=100,y=360)
+        boton_salir = Button(frame_titulo,text="Volver al menú principal",background="orange",font="black",command=Retroceder)
+        boton_salir.place(x=40,y=380)
 
         #Creacion de la tabla para visualizar los datos
         columnas = ("Nombre","Descripcion","Precio","Categoria")
@@ -192,17 +270,35 @@ class Ventana_Gerente:
         tabla.column("Categoria",width=130,anchor="center")
 
         tabla.place(x=255,y=10)
+        bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+
+        bd.CrearConexion()
+
+        query = "SELECT Nombre,Descripcion,Precio,Categoria FROM Medicamentos"
+        
+        resultados = bd.ObtenerDatos(query,())
+        if resultados:
+            for resultado in resultados:
+                tabla.insert("","end",values=resultado)
+        else:
+            print("Datos no encontrados en la tabla")
+        
+        tabla.bind("<<TreeviewSelect>>",Llenar_Campos)
+
+
+        
     
     #Ventana donde se realiza el ABM de empleados
     def Ventana_ABM_Empleados(self):
-
-
+        #Esta funcion carga los entry con los datos del empleado para que luego sean modificados
         def Llenar_Campos(event):
             Limpiar_Campos()
             seleccion = tabla.focus()
+            print(seleccion)
 
             if seleccion:
                 valores = tabla.item(seleccion,"values")
+                print(valores)
 
                 for fila in valores:
                     print(fila)
@@ -213,9 +309,6 @@ class Ventana_Gerente:
                 entry_telefono.insert(0,valores[3])
                 entry_dni.insert(0,valores[4])
                 entry_sueldo.insert(0,valores[5])
-            else:
-                messagebox.showwarning("Advertencia","Por favor seleccione una fila")
-
         #Funcion para limpiar los campos pertenecientes a la ventana
         def Limpiar_Campos():
             entry_nombre.delete(0,END)
@@ -225,7 +318,27 @@ class Ventana_Gerente:
             entry_dni.delete(0,END)
             entry_sueldo.delete(0,END)
             entry_idUsuario.delete(0,END)
-        
+
+        def Eliminar_Usuario():
+            bd.CrearConexion()
+            DNI = entry_dni.get()
+
+
+            if not DNI:
+                messagebox.showwarning("Advertencia","Por favor ingrese el DNI del empleado a eliminar")
+                return
+            
+            try:
+                query = "DELETE FROM Empleados WHERE DNI = %s"
+                bd.Insertar_Datos(query,(DNI,))
+                messagebox.showinfo("Informacion","Usuario eliminado correctamente")
+                Actualizar_Tabla()
+                Limpiar_Campos()
+                bd.CerrarConexion()
+            except Exception as err:
+                messagebox.showwarning("Advertencia!","Por favor ingrese el DNI del empleado a eliminar")
+                print(err)
+
         #Funcion para agregar usuarios a la base de datos
         def Agregar_Usuario():
             id = entry_idUsuario.get()
@@ -256,8 +369,14 @@ class Ventana_Gerente:
             finally:
                 bd.CerrarConexion()
         
-        
         def Modificar_Usuario():
+            bd.CrearConexion()
+            seleccion = tabla.focus()
+
+            if not seleccion:
+                messagebox.showwarning("Advertencia","Por favor seleccione una fila para modificar")
+                return
+
             nombre = entry_nombre.get()
             apellido = entry_apellido.get()
             direccion = entry_direccion.get()
@@ -275,6 +394,7 @@ class Ventana_Gerente:
                 messagebox.showinfo("Informacion","Datos actualizados correctamente")
                 Limpiar_Campos()
                 Actualizar_Tabla()
+                bd.CerrarConexion()
             
             except Exception as err:
                 messagebox.showerror("Error","Error interno al actualizar los datos")
@@ -348,17 +468,17 @@ class Ventana_Gerente:
         boton_modificar = Button(frame_titulo,text="Modificar",background="yellow",font="black",command=Modificar_Usuario)
         boton_modificar.place(x=90,y=310)
 
-        boton_eliminar = Button(frame_titulo,text="Eliminar",background="green2",font="black")
+        boton_eliminar = Button(frame_titulo,text="Eliminar",background="green2",font="black",command=Eliminar_Usuario)
         boton_eliminar.place(x=180,y=310)
         
-        entry_busqueda = Entry(frame_titulo)
-        entry_busqueda.place(x=70,y=350)
+        # entry_busqueda = Entry(frame_titulo)
+        # entry_busqueda.place(x=70,y=350)
 
-        boton_buscar = Button(frame_titulo,text="Buscar Por Nombre",background="orange",font="black")
-        boton_buscar.place(x=50,y=380)
+        # boton_buscar = Button(frame_titulo,text="Buscar Por Nombre",background="orange",font="black")
+        # boton_buscar.place(x=50,y=380)
 
-        boton_atras = Button(frame_titulo,text="Atrás",background="VioletRed1",font="black",command=Retroceder)
-        boton_atras.place(x=100,y=420)
+        boton_atras = Button(frame_titulo,text="Volver al menú principal",background="orange",font="black",command=Retroceder)
+        boton_atras.place(x=40,y=380)
 
         #Creacion de la tabla para visualizar los datos
         columnas = ("Nombre","Apellido","Direccion","Telefono","DNI","Sueldo")
