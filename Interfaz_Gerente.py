@@ -177,14 +177,105 @@ class Ventana_Gerente:
                 print(err)
         
         def Modificar_Medicamento():
-            seleccion = tabla.focus()
-
-            if seleccion:
-                messagebox.showwarning("Advertencia","Por favor seleccione un medicamento")
-                return
+            def Retroceder():
+                root.destroy()
+                ventana_ABM_Productos.deiconify()
             
-            query = "UPDATE Medicamentos SET Nombre = %s,Descripcion = %s,Precio = %s,Categoria = %s WHERE id_medicamento = %s"
-        
+            def Limpiar_Campos():
+                entry_idMedicamento.delete(0,END)
+                entry_nombreM.delete(0,END)
+                entry_descripcionM.delete(0,END)
+                entry_precioM.delete(0,END)
+                entry_categoriaM.delete(0,END)
+            
+            def Mostrar_Datos():
+                seleccion = tabla.focus()
+                nombre = entry_nombre.get()
+
+                if not seleccion:
+                    messagebox.showwarning("Advertencia","Por favor seleccione una fila")
+                    return
+                
+                try:
+                    query = "SELECT id_medicamento,Nombre,Descripcion,Precio,Categoria FROM Medicamentos WHERE Nombre = %s"
+                    resultados = bd.ObtenerDatos(query,(nombre,))
+                    print("Los datos obtenidos son: ",resultados)
+                    
+                    entry_idMedicamento.insert(0,resultados[0][0])
+                    entry_nombreM.insert(0,resultados[0][1])
+                    entry_descripcionM.insert(0,resultados[0][2])
+                    entry_precioM.insert(0,resultados[0][3])
+                    entry_categoriaM.insert(0,resultados[0][4])
+
+                except Exception as err:
+                    messagebox.showerror("Error","Error interno al obtener los datos")
+                    print(err)
+            
+            def Modificar_Datos():
+                id_medicamento = entry_idMedicamento.get()
+                nombre = entry_nombreM.get()
+                descripcion = entry_descripcionM.get()
+                precio = entry_precioM.get()
+                categoria = entry_categoriaM.get()
+
+                try:
+                    query = "UPDATE Medicamentos SET Nombre = %s,Descripcion = %s,Precio = %s,Categoria = %s WHERE id_medicamento = %s"
+                    bd.Insertar_Datos(query,(nombre,descripcion,precio,categoria,id_medicamento))
+                    messagebox.showinfo("Informacion","Datos actualizados correctamente")
+                    Limpiar_Campos()
+                    Actualizar_Tabla()
+                except Exception as err:
+                    messagebox.showerror("Error","Error interno al actualizar los datos")
+                    print(err)
+
+            ventana_ABM_Productos.withdraw()
+            root = CTkToplevel()
+            root.title("Modificar Medicamento")
+            root.geometry("400x500")
+            root.resizable(0,0)
+
+            frame_principal = CTkFrame(root,fg_color="blue",width=400,height=80)
+            frame_principal.place(x=0)
+
+            titulo_frame = CTkLabel(root,text="Modificacion De Datos",fg_color="blue",font=("verdana",25,"bold"))
+            titulo_frame.place(x=50,y=20)
+
+            entry_idMedicamento = CTkEntry(root,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="ID Medicamento",
+                                       placeholder_text_color="gray")
+            entry_idMedicamento.place(x=100,y=120)
+
+            entry_nombreM = CTkEntry(root,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Nombre",
+                                       placeholder_text_color="gray")
+            entry_nombreM.place(x=100,y=170)
+
+            entry_descripcionM = CTkEntry(root,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Descripcion",
+                                       placeholder_text_color="gray")
+            entry_descripcionM.place(x=100,y=220)
+
+            entry_precioM = CTkEntry(root,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Precio",
+                                       placeholder_text_color="gray")
+            entry_precioM.place(x=100,y=270)
+
+            entry_categoriaM = CTkEntry(root,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Categoria",
+                                       placeholder_text_color="gray")
+            entry_categoriaM.place(x=100,y=320)
+
+            boton_modificar = CTkButton(root,text="Modificar",fg_color="blue2",height=40,width=200,font=("Arial",20),command=Modificar_Datos)
+            boton_modificar.place(x=100,y=370)
+
+            boton_atras = CTkButton(root,text="Atrás",fg_color="blue2",height=40,width=200,font=("Arial",20),command=Retroceder)
+            boton_atras.place(x=100,y=420)
+            Mostrar_Datos()
 
         def Eliminar_Medicamento():
             nombre = entry_nombre.get()
