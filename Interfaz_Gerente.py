@@ -7,6 +7,7 @@ from PIL import Image,ImageTk
 from Interfaz_Login import Ventana_Clientes
 from tkinter import ttk
 from Cifrado import *
+import random
 
 class Ventana_Gerente:
     def __init__(self,root,rol,vtn_gerente):
@@ -15,7 +16,6 @@ class Ventana_Gerente:
         self.root.title("Ventana Gerente")
         self.root.geometry("500x600")
         self.root.resizable(0,0)
-
 
         self.vtn_gerente = vtn_gerente
 
@@ -88,6 +88,43 @@ class Ventana_Gerente:
         def Retroceder():
             self.root.deiconify()
             ventana_RC.destroy()
+        
+        def Generar_Contraseña():
+            bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+            bd.CrearConexion()
+            dni = entry_usuario.get()
+            longitud = 6
+            caracteres = "abcdefghijklmnñopqrstuvwxyzABCDEFGHIJKLMNÑOPQRSTUVWXYZ0123456789"
+            lista_caracteres = list(caracteres)
+            clave = ""
+
+            i = 0
+            while i < longitud:
+                clave = clave + random.choice(lista_caracteres)
+                i = i + 1
+        
+            try:
+                query = "UPDATE Usuarios u JOIN Clientes c ON c.id_usuario = u.id_usuario SET u.Contraseña = %s WHERE c.DNI = %s;"
+                resultados = bd.Insertar_Datos(query,(clave,dni))
+
+                if resultados:
+                    messagebox.showinfo("Restablecer Contraseña","Contraseña Genereda exitosamente")
+                    messagebox.showinfo("Restablecer Contraseña",f"Su Contraseña es: {clave}")
+                    entry_usuario.delete(0,END)
+                else:
+                    query_empleados = "UPDATE Usuarios u JOIN Empleados e ON e.id_usuario = u.id_usuario SET u.Contraseña = %s WHERE e.DNI = %s"
+                    resultados = bd.Insertar_Datos(query_empleados,(clave,dni))
+                    if resultados:
+                        messagebox.showinfo("Restablecer Contraseña","Contraseña Genereda exitosamente")
+                        messagebox.showinfo("Restablecer Contraseña",f"Su Contraseña es: {clave}")
+                        entry_usuario.delete(0,END)
+                    else:
+                        messagebox.showwarning("Advertencia","DNI inexistente")
+                        entry_usuario.delete(0,END)
+            except Exception as err:
+                messagebox.showwarning("Adevertencia","Error al generar la contraseña")
+                print(err)
+        
 
         #Creacion de la ventana
         self.root.withdraw()
@@ -108,7 +145,7 @@ class Ventana_Gerente:
                                        placeholder_text_color="gray",border_color="blue2")
         entry_usuario.place(x=100,y=150)
 
-        boton_contraseña = CTkButton(ventana_RC,text="Generar Contraseña",fg_color="blue2",text_color="white",height=40,width=200,font=("Arial",14))
+        boton_contraseña = CTkButton(ventana_RC,text="Generar Contraseña",fg_color="blue2",text_color="white",height=40,width=200,font=("Arial",14),command=Generar_Contraseña)
         boton_contraseña.place(x=100,y=200)
 
         boton_atras = CTkButton(ventana_RC,text="Atrás",fg_color="blue2",text_color="white",height=40,width=200,font=("Arial",14),command=Retroceder)
@@ -280,6 +317,7 @@ class Ventana_Gerente:
         def Eliminar_Medicamento():
             nombre = entry_nombre.get()
             seleccion = tabla.focus()
+            bd.CrearConexion()
 
             if not seleccion:
                 messagebox.showwarning("Advertencia","Por favor seleccione el medicamento a eliminar")

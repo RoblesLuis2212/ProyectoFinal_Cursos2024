@@ -63,10 +63,13 @@ class BaseDeDatos():
         try:
             self.cursor.execute(query,params)
             self.connection.commit()
-            print("Datos insertados correctamente")
+            if self.cursor.rowcount > 0:
+                print("Datos insertados correctamente")
+                return True
         
         except mysql.connector.Error as err:
             print("Error al insertar los datos",err)
+            return False
 
     def Obtener_Id_Usuario(self):
         if self.connection is None is self.cursor in None:
