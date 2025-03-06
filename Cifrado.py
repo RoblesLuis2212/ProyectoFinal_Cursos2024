@@ -40,6 +40,6 @@ def Descifrar_Contraseña(clave):
 # texto_descifrado = Descifrar_Contraseña(texto)
 # print(texto_descifrado)
 
-texto = "boquita"
+texto = "fdvlwdurmd"
 texto_cifrafo = Cifrar_Contraseña(texto)
 print(texto_cifrafo)

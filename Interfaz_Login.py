@@ -6,7 +6,7 @@ from Interfaz_Clientes import Ventana_Clientes
 from PIL import Image,ImageTk
 from Cifrado import *
 from Interfaz_Gerente import Ventana_Gerente
-
+from Interfaz_Empleado import Ventana_Empleado
 
 class App:
     def __init__(self,root):
@@ -71,6 +71,7 @@ class App:
                 self.Mostrar_Menu_Clientes(dni_cliente)
             elif rol == 2:    
                 messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
+                self.Mostrar_Menu_Empleado(rol)
             elif rol == 3:
                 messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
                 self.Mostrar_Menu_Gerente(rol)
@@ -97,6 +98,8 @@ class App:
         self.root.withdraw()
         ventana_gerente = CTkToplevel(self.root)
         Ventana_Gerente(ventana_gerente,self.root,rol)
-
-
-        
+    
+    def Mostrar_Menu_Empleado(self,rol):
+        self.root.withdraw()
+        ventana_empleados = CTkToplevel(self.root)
+        Ventana_Empleado(ventana_empleados,rol,self.root)
