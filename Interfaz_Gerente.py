@@ -414,9 +414,6 @@ class Ventana_Gerente:
         
         tabla.bind("<<TreeviewSelect>>",Llenar_Campos)
 
-
-        
-    
     #Ventana donde se realiza el ABM de empleados
     def Ventana_ABM_Empleados(self):
         #Esta funcion carga los entry con los datos del empleado para que luego sean modificados
