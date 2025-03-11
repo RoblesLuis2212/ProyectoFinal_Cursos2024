@@ -102,10 +102,12 @@ class Ventana_Gerente:
             while i < longitud:
                 clave = clave + random.choice(lista_caracteres)
                 i = i + 1
+            
+            clave_cifrada = Cifrar_Contraseña(clave)
         
             try:
                 query = "UPDATE Usuarios u JOIN Clientes c ON c.id_usuario = u.id_usuario SET u.Contraseña = %s WHERE c.DNI = %s;"
-                resultados = bd.Insertar_Datos(query,(clave,dni))
+                resultados = bd.Insertar_Datos(query,(clave_cifrada,dni))
 
                 if resultados:
                     messagebox.showinfo("Restablecer Contraseña","Contraseña Genereda exitosamente")
@@ -113,7 +115,7 @@ class Ventana_Gerente:
                     entry_usuario.delete(0,END)
                 else:
                     query_empleados = "UPDATE Usuarios u JOIN Empleados e ON e.id_usuario = u.id_usuario SET u.Contraseña = %s WHERE e.DNI = %s"
-                    resultados = bd.Insertar_Datos(query_empleados,(clave,dni))
+                    resultados = bd.Insertar_Datos(query_empleados,(clave_cifrada,dni))
                     if resultados:
                         messagebox.showinfo("Restablecer Contraseña","Contraseña Genereda exitosamente")
                         messagebox.showinfo("Restablecer Contraseña",f"Su Contraseña es: {clave}")
