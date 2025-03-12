@@ -216,6 +216,7 @@ class Ventana_Gerente:
                 print(err)
         
         def Modificar_Medicamento():
+            bd.CrearConexion()
             def Retroceder():
                 root.destroy()
                 ventana_ABM_Productos.deiconify()

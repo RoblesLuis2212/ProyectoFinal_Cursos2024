@@ -5,6 +5,7 @@ from PIL import Image,ImageTk
 from ConexionBD import BaseDeDatos
 from tkinter import ttk
 import datetime
+from Cifrado import Cifrar_Contraseña
 
 class Ventana_Clientes:
     def __init__(self,root,vtn_clientes,dni_cliente):
@@ -51,7 +52,7 @@ class Ventana_Clientes:
         self.label_obrasocial = CTkLabel(self.frame_lateral,text=f"Obra Social: {resultados[0][3]}",text_color="black",font=("Comic Sans MS",15))
         self.label_obrasocial.place(x=30,y=280)
 
-        self.boton_salir = CTkButton(self.frame_lateral,text="SALIR",fg_color="blue",text_color="white",command=self.Salir_Ventana)
+        self.boton_salir = CTkButton(self.frame_lateral,text="SALIR",fg_color="blue",text_color="white",font=("Arial",15),width=180,command=self.Salir_Ventana)
         self.boton_salir.place(x=30,y=420)
 
         self.imagen.image = imagen_tk
@@ -104,6 +105,9 @@ class Ventana_Clientes:
 
         self.boton_finalizar = CTkButton(self.root,text="Finalizar Compra",fg_color="blue",text_color="white",width=70,height=30,command=self.Finalizar_Compra)
         self.boton_finalizar.place(x=800,y=420)
+
+        self.boton_clave = CTkButton(self.frame_lateral,text="CAMBIAR CONTRASEÑA",fg_color="blue2",text_color="white",font=("Arial",15),command=self.Ventana_Contraseña)
+        self.boton_clave.place(x=30,y=380)
         
     def Agregar_Producto(self):
         item_seleccionado = self.tree.selection()
@@ -188,6 +192,92 @@ class Ventana_Clientes:
         messagebox.showinfo("Compra Finalizada",f"Su codigo para retirar el pedido es: {id_pedido}")
         self.tabla_final.delete(*self.tabla_final.get_children())
         self.Calcular_Total()
+    
+    def Ventana_Contraseña(self):
+        self.root.withdraw()
+
+        def Retroceder():
+            vtn_contraseña.destroy()
+            self.root.deiconify()
+        
+        def Cambiar_Contraseña():
+            #Se obtienen los datos de los entry
+            contraseña_actual = entry_clave_actual.get()
+            contraseña_nueva = entry_clave_nueva.get()
+            contraseña_confirmada = entry_confirmar_clave.get()
+
+            #Se verifica que los campos no esten vacios
+            if not contraseña_actual or not contraseña_nueva or not contraseña_confirmada:
+                messagebox.showwarning("Advertencia","Por favor complete todos los campos")
+                return
+            
+            #Verifica que la contraseña nueva sea igual a la confirmada
+            if contraseña_nueva != contraseña_confirmada:
+                messagebox.showwarning("Advertencia","La contraseña nueva no coincide")
+                return
+            
+            #Se cifra la contraseña actual para poder compararla con la de la base de datos
+            contraseña_actual = Cifrar_Contraseña(contraseña_actual)
+            #Una vez confirmada la contraseña en cifrada
+            contraseña_cifrada = Cifrar_Contraseña(contraseña_confirmada)
+            
+            bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+            bd.CrearConexion()
+
+            query_verificar = "SELECT u.Contraseña,c.DNI FROM Usuarios u JOIN Clientes c ON u.id_usuario = c.id_usuario WHERE c.DNI = %s;"
+
+            resultados = bd.ObtenerDatos(query_verificar,(self.dni_cliente,))
+
+            #Verificamos que nos lleguen los datos y comparamos las contraseñas con los resultados
+            if not resultados or resultados[0][0] != contraseña_actual:
+                messagebox.showwarning("Advertencia","La contraseña actual es incorrecta")
+                return
+            
+            #Se intentan insertar los datos
+            try:
+                query_actualizar = "UPDATE Usuarios u JOIN Clientes c ON u.id_usuario = c.id_usuario SET u.Contraseña = %s WHERE c.DNI = %s;"
+                bd.Insertar_Datos(query_actualizar,(contraseña_cifrada,self.dni_cliente))
+                messagebox.showinfo("Actulizar contraseña","Contraseña actualizada correctamente")
+            #Se captura el error en caso de haberlo
+            except Exception as err:
+                print(err)
+
+        #Diseño de la ventana
+        vtn_contraseña = CTkToplevel()
+        vtn_contraseña.title("Cambiar contraseña")
+        vtn_contraseña.geometry("400x500")
+        vtn_contraseña.resizable(0,0)
+
+        frame_lateral = CTkFrame(vtn_contraseña,fg_color="blue2",width=500,height=100)
+        frame_lateral.place(x=0)
+
+        label_titulo = CTkLabel(frame_lateral,text="Cambiar contraseña",fg_color="blue2",font=("Arial",30,"bold"))
+        label_titulo.place(x=60,y=30)
+
+        entry_clave_actual = CTkEntry(vtn_contraseña,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Contraseña actual",
+                                       placeholder_text_color="gray",border_color="blue2")
+        entry_clave_actual.place(x=100,y=150)
+
+        entry_clave_nueva = CTkEntry(vtn_contraseña,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Nueva contraseña",
+                                       placeholder_text_color="gray",border_color="blue2")
+        entry_clave_nueva.place(x=100,y=205)
+
+        entry_confirmar_clave = CTkEntry(vtn_contraseña,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Confirmar contraseña",
+                                       placeholder_text_color="gray",border_color="blue2")
+        entry_confirmar_clave.place(x=100,y=260)
+
+        boton_cambiar = CTkButton(vtn_contraseña,text="Actualizar",fg_color="blue2",text_color="white",height=40,width=200,font=("Arial",14),command=Cambiar_Contraseña)
+        boton_cambiar.place(x=100,y=310)
+
+        boton_salir = CTkButton(vtn_contraseña,text="Atrás",fg_color="blue2",text_color="white",height=40,width=200,font=("Arial",14),command=Retroceder)
+        boton_salir.place(x=100,y=360)
+
     
     def Salir_Ventana(self):
         opcion = messagebox.askokcancel("Salir","¿Esta seguro que desea salir del programa?")

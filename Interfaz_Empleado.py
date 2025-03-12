@@ -49,7 +49,7 @@ class Ventana_Empleado:
         self.boton_contreñas = CTkButton(self.frame_lateral,text="RESTABLECER CONTRASEÑA",fg_color="blue2",command=self.Restablecer_Contraseña)
         self.boton_contreñas.place(x=40,y=130)
 
-        self.boton_agregar = CTkButton(self.frame_lateral,text="AGREGAR MEDICAMENTO",fg_color="blue2",width=185)
+        self.boton_agregar = CTkButton(self.frame_lateral,text="SOLICITAR MEDICAMENTO",fg_color="blue2",width=185)
         self.boton_agregar.place(x=40,y=160)
 
         self.boton_actualizar = CTkButton(self.frame_lateral,text="ACTUALIZAR DATOS",fg_color="blue2",width=185)
