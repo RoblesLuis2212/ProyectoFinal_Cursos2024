@@ -160,6 +160,7 @@ class Ventana_Gerente:
             entry_descripcion.delete(0,END)
             entry_precio.delete(0,END)
             entry_categoria.delete(0,END)
+            entry_stock.delete(0,END)
 
         def Llenar_Campos(event):
             Limpiar_Campos()
@@ -177,6 +178,7 @@ class Ventana_Gerente:
                 entry_descripcion.insert(0,valores[1])
                 entry_precio.insert(0,valores[2])
                 entry_categoria.insert(0,valores[3])
+                entry_stock.insert(0,valores[4])
             
         def Retroceder():
             self.root.deiconify()
@@ -187,7 +189,7 @@ class Ventana_Gerente:
                 tabla.delete(i)
             
             bd.CrearConexion()
-            query = "SELECT Nombre,Descripcion,Precio,Categoria FROM Medicamentos"
+            query = "SELECT Nombre,Descripcion,Precio,Categoria,Stock FROM Medicamentos"
             resultados = bd.ObtenerDatos(query,())
 
             if resultados:
@@ -227,6 +229,7 @@ class Ventana_Gerente:
                 entry_descripcionM.delete(0,END)
                 entry_precioM.delete(0,END)
                 entry_categoriaM.delete(0,END)
+                entry_stockM.delete(0,END)
             
             def Mostrar_Datos():
                 seleccion = tabla.focus()
@@ -237,7 +240,7 @@ class Ventana_Gerente:
                     return
                 
                 try:
-                    query = "SELECT id_medicamento,Nombre,Descripcion,Precio,Categoria FROM Medicamentos WHERE Nombre = %s"
+                    query = "SELECT id_medicamento,Nombre,Descripcion,Precio,Categoria,Stock FROM Medicamentos WHERE Nombre = %s"
                     resultados = bd.ObtenerDatos(query,(nombre,))
                     print("Los datos obtenidos son: ",resultados)
                     
@@ -246,6 +249,7 @@ class Ventana_Gerente:
                     entry_descripcionM.insert(0,resultados[0][2])
                     entry_precioM.insert(0,resultados[0][3])
                     entry_categoriaM.insert(0,resultados[0][4])
+                    entry_stockM.insert(0,resultados[0][5])
 
                 except Exception as err:
                     messagebox.showerror("Error","Error interno al obtener los datos")
@@ -257,10 +261,11 @@ class Ventana_Gerente:
                 descripcion = entry_descripcionM.get()
                 precio = entry_precioM.get()
                 categoria = entry_categoriaM.get()
+                stock = entry_stockM.get()
 
                 try:
-                    query = "UPDATE Medicamentos SET Nombre = %s,Descripcion = %s,Precio = %s,Categoria = %s WHERE id_medicamento = %s"
-                    bd.Insertar_Datos(query,(nombre,descripcion,precio,categoria,id_medicamento))
+                    query = "UPDATE Medicamentos SET Nombre = %s,Descripcion = %s,Precio = %s,Categoria = %s,Stock = %s WHERE id_medicamento = %s"
+                    bd.Insertar_Datos(query,(nombre,descripcion,precio,categoria,stock,id_medicamento))
                     messagebox.showinfo("Informacion","Datos actualizados correctamente")
                     Limpiar_Campos()
                     Actualizar_Tabla()
@@ -271,7 +276,7 @@ class Ventana_Gerente:
             ventana_ABM_Productos.withdraw()
             root = CTkToplevel()
             root.title("Modificar Medicamento")
-            root.geometry("400x500")
+            root.geometry("400x600")
             root.resizable(0,0)
 
             frame_principal = CTkFrame(root,fg_color="blue",width=400,height=80)
@@ -310,11 +315,17 @@ class Ventana_Gerente:
                                        placeholder_text_color="gray")
             entry_categoriaM.place(x=100,y=320)
 
+            entry_stockM = CTkEntry(root,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Stock",
+                                       placeholder_text_color="gray")
+            entry_stockM.place(x=100,y=370)
+
             boton_modificar = CTkButton(root,text="Modificar",fg_color="blue2",height=40,width=200,font=("Arial",20),command=Modificar_Datos)
-            boton_modificar.place(x=100,y=370)
+            boton_modificar.place(x=100,y=415)
 
             boton_atras = CTkButton(root,text="Atrás",fg_color="blue2",height=40,width=200,font=("Arial",20),command=Retroceder)
-            boton_atras.place(x=100,y=420)
+            boton_atras.place(x=100,y=460)
             Mostrar_Datos()
 
         def Eliminar_Medicamento():
@@ -339,7 +350,7 @@ class Ventana_Gerente:
         self.root.withdraw()
         ventana_ABM_Productos = CTkToplevel()
         ventana_ABM_Productos.title("ABM Productos")
-        ventana_ABM_Productos.geometry("800x500")
+        ventana_ABM_Productos.geometry("920x500")
         ventana_ABM_Productos.resizable(0,0)
 
 
@@ -373,40 +384,48 @@ class Ventana_Gerente:
         entry_categoria = Entry(frame_titulo)
         entry_categoria.place(x=100,y=155)
 
+        label_stock = CTkLabel(frame_titulo,text="Stock",font=("Rod",15,"bold"))
+        label_stock.place(x=25,y=185)
+
+        entry_stock = Entry(frame_titulo)
+        entry_stock.place(x=100,y=190)
+
         boton_agregar = Button(frame_titulo,text="Agregar",background="red",font="black",command=Cargar_Medicamento)
-        boton_agregar.place(x=10,y=200)
+        boton_agregar.place(x=10,y=250)
 
         boton_modificar = Button(frame_titulo,text="Modificar",background="yellow",font="black",command=Modificar_Medicamento)
-        boton_modificar.place(x=90,y=200)
+        boton_modificar.place(x=90,y=250)
 
         boton_eliminar = Button(frame_titulo,text="Eliminar",background="green2",font="black",command=Eliminar_Medicamento)
-        boton_eliminar.place(x=180,y=200)
+        boton_eliminar.place(x=180,y=250)
         
 
         boton_salir = Button(frame_titulo,text="Volver al menú principal",background="orange",font="black",command=Retroceder)
         boton_salir.place(x=40,y=380)
 
         #Creacion de la tabla para visualizar los datos
-        columnas = ("Nombre","Descripcion","Precio","Categoria")
+        columnas = ("Nombre","Descripcion","Precio","Categoria","Stock")
         tabla = ttk.Treeview(ventana_ABM_Productos,columns=columnas,show="headings",height=25)
 
         tabla.heading("Nombre",text="Nombre")
         tabla.heading("Descripcion",text="Descripcion")
         tabla.heading("Precio",text="Precio")
         tabla.heading("Categoria",text="Categoria")
+        tabla.heading("Stock",text="Stock")
 
 
         tabla.column("Nombre",width=130,anchor="center")
         tabla.column("Descripcion",width=130,anchor="center")
         tabla.column("Precio",width=130,anchor="center")
         tabla.column("Categoria",width=130,anchor="center")
+        tabla.column("Stock",width=130,anchor="center")
 
         tabla.place(x=255,y=10)
         bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
 
         bd.CrearConexion()
 
-        query = "SELECT Nombre,Descripcion,Precio,Categoria FROM Medicamentos"
+        query = "SELECT Nombre,Descripcion,Precio,Categoria,Stock FROM Medicamentos"
         
         resultados = bd.ObtenerDatos(query,())
         if resultados:

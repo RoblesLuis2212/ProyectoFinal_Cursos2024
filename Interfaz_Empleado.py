@@ -8,9 +8,10 @@ from Cifrado import Cifrar_Contraseña
 
 #Clase que contiene el diseño de la ventana empleados
 class Ventana_Empleado:
-    def __init__(self,root,rol,vtn_empleado):
+    def __init__(self,root,rol,vtn_empleado,dni_empleado):
         self.root = root
         self.rol = rol
+        self.dni_empleado = dni_empleado
         self.root.title("Ventana Empleados")
         self.root.geometry("920x400")
         self.root.resizable(0,0)
@@ -34,7 +35,7 @@ class Ventana_Empleado:
         self.entry_id_pedido = Entry(self.root)
         self.entry_id_pedido.place(x=100,y=65)
 
-        self.boton_confirmar = CTkButton(self.root,text="Confirmar Compra",fg_color="blue2",font=("Arial",15,),width=150,height=40)
+        self.boton_confirmar = CTkButton(self.root,text="Confirmar Compra",fg_color="blue2",font=("Arial",15,),width=150,height=40,command=self.Confirmar_Compra)
         self.boton_confirmar.place(x=260,y=250)
 
         self.boton_cancelar = CTkButton(self.root,text="Cancelar Compra",fg_color="blue2",font=("Arial",15,),width=150,height=40)
@@ -54,6 +55,9 @@ class Ventana_Empleado:
 
         self.boton_actualizar = CTkButton(self.frame_lateral,text="ACTUALIZAR DATOS",fg_color="blue2",width=185)
         self.boton_actualizar.place(x=40,y=190)
+
+        boton_cambiarContraseña = CTkButton(self.frame_lateral,text="CAMBIAR CONTRASEÑA",width=185,fg_color="blue2",command=self.Ventana_Contraseña)
+        boton_cambiarContraseña.place(x=40,y=290)
 
         self.boton_salir = CTkButton(self.frame_lateral,text="SALIR",fg_color="blue2",width=185,command=self.Salir)
         self.boton_salir.place(x=40,y=320)
@@ -76,6 +80,40 @@ class Ventana_Empleado:
         self.tabla.column("Total",width=130,anchor="center")
 
         self.tabla.place(x=255,y=10)
+    
+    def Confirmar_Compra(self):
+        bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+        bd.CrearConexion()
+
+        query_ActualizarEstado = "UPDATE Pedidos SET Estado = 'Aceptado' WHERE id_pedido = %s;"
+
+        query_consultarEstado = "SELECT id_pedido,Estado FROM Pedidos WHERE Estado = 'Aceptado';"
+        resultados_estado = bd.ObtenerDatos(query_consultarEstado,())
+
+        #Esta consulta obtiene la cantidad de cada medicamento solicitado en cada pedido
+        query_cantidad = "SELECT m.Nombre,m.id_medicamento,dp.Cantidad,dp.id_pedido FROM Medicamentos m JOIN Detalle_Pedidos dp ON m.id_medicamento = dp.id_medicamento WHERE dp.id_pedido = %s;"
+
+        id_detallePedido = self.entry_id_pedido.get()
+        resultados = bd.ObtenerDatos(query_cantidad,(id_detallePedido,))
+
+        if resultados_estado:
+            messagebox.showwarning("Advertencia","El pedido ingresado ya fue aceptado")
+            return
+
+        if not resultados:
+            messagebox.showwarning("Advertencia","No se encontraron productos")
+            return
+        
+        try:
+            for nombre,id_medicamento, cantidad, id_pedido in resultados:
+                query_actualizacion = "UPDATE Medicamentos SET Stock = Stock - %s WHERE id_medicamento = %s AND Stock >= %s;"
+
+                bd.Insertar_Datos(query_actualizacion,(cantidad,id_medicamento,cantidad))
+                bd.Insertar_Datos(query_ActualizarEstado,(id_detallePedido,))
+            messagebox.showinfo("Informacion","Compra finalizada correctamente")
+            self.Limpiar_Tabla()
+        except Exception as err:
+            print(err)
 
     def Obtener_Datos(self):
         bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
@@ -95,13 +133,98 @@ class Ventana_Empleado:
             if resultados:
                 for datos in resultados:
                     self.tabla.insert("","end",values=datos)
-                    self.entry_id_pedido.delete(0,END)
             else:
                 messagebox.showwarning("Advertencia","ID de pedido inexistente")
                 self.entry_id_pedido.delete(0,END)
         except Exception as err:
             messagebox.showerror("Error","Error interno al obtener los datos")
             print(err)
+    
+    def Ventana_Contraseña(self):
+        self.root.withdraw()
+
+        def Retroceder():
+            vtn_contraseña.destroy()
+            self.root.deiconify()
+        
+        def Cambiar_Contraseña():
+            bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+            bd.CrearConexion()
+            
+            #Se obtienen los datos de los entry
+            contraseña_actual = entry_clave_actual.get()
+            contraseña_nueva = entry_clave_nueva.get()
+            contraseña_confirmada = entry_confirmar_clave.get()
+
+            #Se verifica que los campos no esten vacios
+            if not contraseña_actual or not contraseña_nueva or not contraseña_confirmada:
+                messagebox.showwarning("Advertencia","Por favor complete todos los campos")
+                return
+            
+            #Verifica que la contraseña nueva sea igual a la confirmada
+            if contraseña_nueva != contraseña_confirmada:
+                messagebox.showwarning("Advertencia","La contraseña nueva no coincide")
+                return
+            
+            #Se cifra la contraseña actual para poder compararla con la de la base de datos
+            contraseña_actual = Cifrar_Contraseña(contraseña_actual)
+            #Una vez confirmada la contraseña en cifrada
+            contraseña_cifrada = Cifrar_Contraseña(contraseña_confirmada)
+            
+
+            query_verificar = "SELECT u.Contraseña,e.DNI FROM Usuarios u JOIN Empleados e ON u.id_usuario = e.id_usuario WHERE e.DNI = %s;"
+
+            resultados = bd.ObtenerDatos(query_verificar,(self.dni_empleado,))
+
+            #Verificamos que nos lleguen los datos y comparamos las contraseñas con los resultados
+            if not resultados or resultados[0][0] != contraseña_actual:
+                messagebox.showwarning("Advertencia","La contraseña actual es incorrecta")
+                return
+            
+            #Se intentan insertar los datos
+            try:
+                query_actualizar = "UPDATE Usuarios u JOIN Empleados c ON u.id_usuario = c.id_usuario SET u.Contraseña = %s WHERE c.DNI = %s;"
+                bd.Insertar_Datos(query_actualizar,(contraseña_cifrada,self.dni_empleado))
+                messagebox.showinfo("Actulizar contraseña","Contraseña actualizada correctamente")
+            #Se captura el error en caso de haberlo
+            except Exception as err:
+                print(err)
+
+        #Diseño de la ventana
+        vtn_contraseña = CTkToplevel()
+        vtn_contraseña.title("Cambiar contraseña")
+        vtn_contraseña.geometry("400x500")
+        vtn_contraseña.resizable(0,0)
+
+        frame_lateral = CTkFrame(vtn_contraseña,fg_color="blue2",width=500,height=100)
+        frame_lateral.place(x=0)
+
+        label_titulo = CTkLabel(frame_lateral,text="Cambiar contraseña",fg_color="blue2",font=("Arial",30,"bold"))
+        label_titulo.place(x=60,y=30)
+
+        entry_clave_actual = CTkEntry(vtn_contraseña,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Contraseña actual",
+                                       placeholder_text_color="gray",border_color="blue2")
+        entry_clave_actual.place(x=100,y=150)
+
+        entry_clave_nueva = CTkEntry(vtn_contraseña,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Nueva contraseña",
+                                       placeholder_text_color="gray",border_color="blue2")
+        entry_clave_nueva.place(x=100,y=205)
+
+        entry_confirmar_clave = CTkEntry(vtn_contraseña,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Confirmar contraseña",
+                                       placeholder_text_color="gray",border_color="blue2")
+        entry_confirmar_clave.place(x=100,y=260)
+
+        boton_cambiar = CTkButton(vtn_contraseña,text="Actualizar",fg_color="blue2",text_color="white",height=40,width=200,font=("Arial",14),command=Cambiar_Contraseña)
+        boton_cambiar.place(x=100,y=310)
+
+        boton_salir = CTkButton(vtn_contraseña,text="Atrás",fg_color="blue2",text_color="white",height=40,width=200,font=("Arial",14),command=Retroceder)
+        boton_salir.place(x=100,y=360)
 
     def Restablecer_Contraseña(self):
 
@@ -158,7 +281,6 @@ class Ventana_Empleado:
 
         boton_atras = CTkButton(vtn_contraseña,text="Atrás",fg_color="blue2",text_color="white",height=40,width=200,font=("Arial",14),command=lambda: self.Retroceder(vtn_contraseña))
         boton_atras.place(x=100,y=215)
-
 
     def Limpiar_Tabla(self):
         self.tabla.delete(*self.tabla.get_children())

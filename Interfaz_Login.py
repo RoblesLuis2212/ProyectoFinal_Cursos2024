@@ -58,20 +58,20 @@ class App:
         #Se crea la conexion con la base de datos
         bd.CrearConexion()
         #Se realiza un JOIN para poder obtener tanto el username,contraseña y rol 
-        query = "SELECT u.Rol, c.DNI FROM Usuarios u LEFT JOIN Clientes c ON u.id_usuario = c.id_usuario WHERE u.Username = %s AND u.Contraseña = %s"
-
+        query = "SELECT u.Rol, c.DNI AS DNI_Cliente, e.DNI AS DNI_Empleado FROM Usuarios u LEFT JOIN Clientes c ON u.id_usuario = c.id_usuario LEFT JOIN Empleados e ON u.id_usuario = e.id_usuario WHERE u.Username = %s AND u.Contraseña = %s;"
         resultados = bd.ObtenerDatos(query,(usuario,clave_cifrada))
 
         #Dependiendo del rol obtenido de la base de datos se muestra la ventana correspondiente            
         if resultados:
             rol = resultados[0][0]
             dni_cliente = resultados[0][1]
+            dni_empleado = resultados[0][2]
             if rol == 1:
                 messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
                 self.Mostrar_Menu_Clientes(dni_cliente)
             elif rol == 2:    
                 messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
-                self.Mostrar_Menu_Empleado(rol)
+                self.Mostrar_Menu_Empleado(rol,dni_empleado)
             elif rol == 3:
                 messagebox.showinfo("Inicio De Sesion","Inicio de sesión exitoso")
                 self.Mostrar_Menu_Gerente(rol)
@@ -99,7 +99,7 @@ class App:
         ventana_gerente = CTkToplevel(self.root)
         Ventana_Gerente(ventana_gerente,self.root,rol)
     
-    def Mostrar_Menu_Empleado(self,rol):
+    def Mostrar_Menu_Empleado(self,rol,dni_empleado):
         self.root.withdraw()
         ventana_empleados = CTkToplevel(self.root)
-        Ventana_Empleado(ventana_empleados,rol,self.root)
+        Ventana_Empleado(ventana_empleados,rol,self.root,dni_empleado)
