@@ -38,7 +38,7 @@ class Ventana_Empleado:
         self.boton_confirmar = CTkButton(self.root,text="Confirmar Compra",fg_color="blue2",font=("Arial",15,),width=150,height=40,command=self.Confirmar_Compra)
         self.boton_confirmar.place(x=260,y=250)
 
-        self.boton_cancelar = CTkButton(self.root,text="Cancelar Compra",fg_color="blue2",font=("Arial",15,),width=150,height=40)
+        self.boton_cancelar = CTkButton(self.root,text="Cancelar Compra",fg_color="blue2",font=("Arial",15,),width=150,height=40,command=self.Cancelar_Compra)
         self.boton_cancelar.place(x=420,y=250)
 
         self.boton_limpiar = CTkButton(self.root,text="Limpiar Tabla",fg_color="blue2",font=("Arial",15),width=150,height=40,command=self.Limpiar_Tabla)
@@ -50,8 +50,8 @@ class Ventana_Empleado:
         self.boton_contreñas = CTkButton(self.frame_lateral,text="RESTABLECER CONTRASEÑA",fg_color="blue2",command=self.Restablecer_Contraseña)
         self.boton_contreñas.place(x=40,y=130)
 
-        self.boton_agregar = CTkButton(self.frame_lateral,text="SOLICITAR MEDICAMENTO",fg_color="blue2",width=185)
-        self.boton_agregar.place(x=40,y=160)
+        self.boton_Stock = CTkButton(self.frame_lateral,text="ACTUALIZAR STOCK",fg_color="blue2",width=185,command=self.Ventana_Actualizar_Stock)
+        self.boton_Stock.place(x=40,y=160)
 
         self.boton_actualizar = CTkButton(self.frame_lateral,text="ACTUALIZAR DATOS",fg_color="blue2",width=185)
         self.boton_actualizar.place(x=40,y=190)
@@ -87,17 +87,22 @@ class Ventana_Empleado:
 
         query_ActualizarEstado = "UPDATE Pedidos SET Estado = 'Aceptado' WHERE id_pedido = %s;"
 
-        query_consultarEstado = "SELECT id_pedido,Estado FROM Pedidos WHERE Estado = 'Aceptado';"
-        resultados_estado = bd.ObtenerDatos(query_consultarEstado,())
-
         #Esta consulta obtiene la cantidad de cada medicamento solicitado en cada pedido
         query_cantidad = "SELECT m.Nombre,m.id_medicamento,dp.Cantidad,dp.id_pedido FROM Medicamentos m JOIN Detalle_Pedidos dp ON m.id_medicamento = dp.id_medicamento WHERE dp.id_pedido = %s;"
 
         id_detallePedido = self.entry_id_pedido.get()
         resultados = bd.ObtenerDatos(query_cantidad,(id_detallePedido,))
+        
+        query_consultarEstado = "SELECT id_pedido,Estado FROM Pedidos WHERE id_pedido = %s;"
+        resultados_estado = bd.ObtenerDatos(query_consultarEstado,(id_detallePedido,))
 
-        if resultados_estado:
+        if resultados_estado[0][1] == 'Aceptado':
             messagebox.showwarning("Advertencia","El pedido ingresado ya fue aceptado")
+            print(resultados_estado)
+            return
+        
+        if resultados_estado[0][1] == 'Rechazado':
+            messagebox.showwarning("Advertencia","El pedido que intenta aceptar fue rechazado")
             return
 
         if not resultados:
@@ -114,6 +119,26 @@ class Ventana_Empleado:
             self.Limpiar_Tabla()
         except Exception as err:
             print(err)
+
+    def Cancelar_Compra(self):
+        bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+        bd.CrearConexion()
+
+        id_pedido = self.entry_id_pedido.get()
+
+        query_consultarEstado = "SELECT id_pedido,Estado FROM Pedidos WHERE id_pedido = %s;"
+        resultados_Estado = bd.ObtenerDatos(query_consultarEstado,(id_pedido,))
+
+        try:
+            if resultados_Estado[0][1] != 'Aceptado':
+                query_actualizarEstado = "UPDATE Pedidos SET Estado = 'Rechazado' WHERE id_pedido = %s;"
+                bd.Insertar_Datos(query_actualizarEstado,(id_pedido,))
+                messagebox.showinfo("Informacion","El pedido fue cancelado exitosamente")
+            else:
+                messagebox.showwarning("Advertencia","El pedido no puede ser cancelado porque ya fue aceptado")
+        except Exception as err:
+            print(err)
+        
 
     def Obtener_Datos(self):
         bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
@@ -225,6 +250,67 @@ class Ventana_Empleado:
 
         boton_salir = CTkButton(vtn_contraseña,text="Atrás",fg_color="blue2",text_color="white",height=40,width=200,font=("Arial",14),command=Retroceder)
         boton_salir.place(x=100,y=360)
+    
+    def Ventana_Actualizar_Stock(self):
+        def Actualizar_Stock():
+                medicamento_nombre = lista_medicamentos.get()
+
+                id_medicamento = None
+                for nombre,id_med in medicamentos_d:
+                    if nombre == medicamento_nombre:
+                        id_medicamento = id_med
+                        break
+                
+                try:
+                    nuevo_stock = entry_stock.get()
+                    query = "UPDATE Medicamentos SET Stock = %s WHERE id_medicamento = %s"
+                    bd.Insertar_Datos(query,(nuevo_stock,id_medicamento))
+                    messagebox.showinfo("Informacion","Stock actualizado correctamente")
+                    entry_stock.delete(0,END)
+                    vtn_stock.destroy()
+                    self.root.deiconify()
+                except Exception as err:
+                    print(err)
+        
+        self.root.withdraw()
+        bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+        bd.CrearConexion()
+        #Diseño de la ventana
+        vtn_stock = CTkToplevel()
+        vtn_stock.title("Actualizar Stock")
+        vtn_stock.geometry("400x500")
+        vtn_stock.resizable(0,0)
+        
+        self.vtn_empleado.withdraw()
+
+        frame_titulo = CTkFrame(vtn_stock,fg_color="blue2",width=400,height=100)
+        frame_titulo.place(x=0)
+
+        label_titulo = CTkLabel(frame_titulo,text="Actualizar Stock",fg_color="blue2",font=("Arial",25,"bold"))
+        label_titulo.place(x=100,y=30)
+
+        query = "SELECT id_medicamento,Nombre FROM Medicamentos;"
+        medicamentos = bd.ObtenerDatos(query,())
+
+        medicamentos_d = [(medicamento[1],medicamento[0]) for medicamento in medicamentos]
+
+        medicamentos_nombres = [medicamento[0] for medicamento in medicamentos_d]
+
+        lista_medicamentos = CTkComboBox(vtn_stock,values=medicamentos_nombres,width=200,height=40,border_color="blue2")
+        lista_medicamentos.place(x=100,y=120)
+
+        entry_stock = CTkEntry(vtn_stock,width=200,height=40,
+                                       font=("Arial",16),
+                                       placeholder_text="Stock",
+                                       placeholder_text_color="gray",border_color="blue2")
+        entry_stock.place(x=100,y=170)
+
+        boton_actualizar = CTkButton(vtn_stock,text="Actualizar",width=200,height=40,font=("Segoe UI",20),fg_color="blue2",command=Actualizar_Stock)
+        boton_actualizar.place(x=100,y=220)
+
+        boton_atras = CTkButton(vtn_stock,text="Atrás",width=200,height=40,font=("Segoe UI",20),fg_color="blue2",command=lambda: self.Retroceder(vtn_stock))
+        boton_atras.place(x=100,y=270)
+
 
     def Restablecer_Contraseña(self):
 
@@ -258,6 +344,7 @@ class Ventana_Empleado:
             finally:
                 bd.CerrarConexion()
             
+        #Diseño de la ventana
         self.root.withdraw()
         vtn_contraseña = CTkToplevel()
         vtn_contraseña.title("Restablecer Contraseña")
@@ -289,6 +376,7 @@ class Ventana_Empleado:
         ventana.destroy()
         self.root.deiconify()
 
-
     def Salir(self):
-        self.root.destroy()
+        opcion = messagebox.askokcancel("Salir","¿Esta seguro de que desea salir?")
+        if opcion:
+            self.root.destroy()

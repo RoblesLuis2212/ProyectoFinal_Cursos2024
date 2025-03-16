@@ -82,6 +82,8 @@ class Ventana_Gerente:
         self.boton_salir.image = imagen_salirTK
         self.boton_salir.place(x=100,y=470,width=320,height=70)
 
+        self.Verificar_Stock()
+
     #Esta es la ventana para restablacer las contraseñas
     def Ventana_Contraseñas(self):
 
@@ -205,10 +207,11 @@ class Ventana_Gerente:
             descripcion = entry_descripcion.get()
             precio = entry_precio.get()
             categoria = entry_categoria.get()
+            stock = entry_stock.get()
 
             try:
-                query = "INSERT INTO Medicamentos (Nombre,Descripcion,Precio,Categoria) VALUES (%s,%s,%s,%s)"
-                bd.Insertar_Datos(query,(nombre,descripcion,precio,categoria))
+                query = "INSERT INTO Medicamentos (Nombre,Descripcion,Precio,Categoria,Stock) VALUES (%s,%s,%s,%s,%s)"
+                bd.Insertar_Datos(query,(nombre,descripcion,precio,categoria,stock))
                 messagebox.showinfo("Informacion","Medicamento cargado correctamente")
                 Actualizar_Tabla()
                 Limpiar_Campos()
@@ -269,6 +272,8 @@ class Ventana_Gerente:
                     messagebox.showinfo("Informacion","Datos actualizados correctamente")
                     Limpiar_Campos()
                     Actualizar_Tabla()
+                    root.destroy()
+                    ventana_ABM_Productos.deiconify()
                 except Exception as err:
                     messagebox.showerror("Error","Error interno al actualizar los datos")
                     print(err)
@@ -751,6 +756,17 @@ class Ventana_Gerente:
 
         boton_atras = CTkButton(vtn_usuario,text="Atrás",fg_color="blue",width=200,height=40,font=("arial",15,"bold"),command=Retroceder)
         boton_atras.place(x=100,y=270)
+    
+    def Verificar_Stock(self):
+        bd = BaseDeDatos(host="localhost",user="root",password="Soydeboca66",database="Farmacia")
+        bd.CrearConexion()
+
+        query = "SELECT * FROM Medicamentos WHERE Stock < 5;"
+
+        resultados = bd.ObtenerDatos(query,())
+
+        if resultados:
+            messagebox.showwarning("Advertencia","Atencion se esta agotando el stock de algunos medicamentos")
 
     def Salir(self):
         opcion = messagebox.askokcancel("Salir","¿Esta seguro de que desea salir?")
