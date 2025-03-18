@@ -53,9 +53,6 @@ class Ventana_Empleado:
         self.boton_Stock = CTkButton(self.frame_lateral,text="ACTUALIZAR STOCK",fg_color="blue2",width=185,command=self.Ventana_Actualizar_Stock)
         self.boton_Stock.place(x=40,y=160)
 
-        self.boton_actualizar = CTkButton(self.frame_lateral,text="ACTUALIZAR DATOS",fg_color="blue2",width=185)
-        self.boton_actualizar.place(x=40,y=190)
-
         boton_cambiarContraseña = CTkButton(self.frame_lateral,text="CAMBIAR CONTRASEÑA",width=185,fg_color="blue2",command=self.Ventana_Contraseña)
         boton_cambiarContraseña.place(x=40,y=290)
 
@@ -87,6 +84,10 @@ class Ventana_Empleado:
 
         query_ActualizarEstado = "UPDATE Pedidos SET Estado = 'Aceptado' WHERE id_pedido = %s;"
 
+        query_VerificarStock = "SELECT Nombre FROM Medicamentos WHERE Stock = 0;"
+
+        resultados_stock = bd.ObtenerDatos(query_VerificarStock,())
+
         #Esta consulta obtiene la cantidad de cada medicamento solicitado en cada pedido
         query_cantidad = "SELECT m.Nombre,m.id_medicamento,dp.Cantidad,dp.id_pedido FROM Medicamentos m JOIN Detalle_Pedidos dp ON m.id_medicamento = dp.id_medicamento WHERE dp.id_pedido = %s;"
 
@@ -103,6 +104,13 @@ class Ventana_Empleado:
         
         if resultados_estado[0][1] == 'Rechazado':
             messagebox.showwarning("Advertencia","El pedido que intenta aceptar fue rechazado")
+            return
+        
+        if resultados_stock:
+            nombres = ""
+            for i in resultados_stock:
+                nombres += i[0] + "\n"
+            messagebox.showwarning("Advertencia",f"Los siguientes medicamentos no tienen stock:\n{nombres}")
             return
 
         if not resultados:
@@ -267,8 +275,6 @@ class Ventana_Empleado:
                     bd.Insertar_Datos(query,(nuevo_stock,id_medicamento))
                     messagebox.showinfo("Informacion","Stock actualizado correctamente")
                     entry_stock.delete(0,END)
-                    vtn_stock.destroy()
-                    self.root.deiconify()
                 except Exception as err:
                     print(err)
         
