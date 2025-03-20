@@ -462,6 +462,9 @@ class Ventana_Gerente:
                 entry_telefono.insert(0,valores[3])
                 entry_dni.insert(0,valores[4])
                 entry_sueldo.insert(0,valores[5])
+                entry_idUsuario.insert(0,valores[6])
+
+
         #Funcion para limpiar los campos pertenecientes a la ventana
         def Limpiar_Campos():
             entry_nombre.delete(0,END)
@@ -475,6 +478,7 @@ class Ventana_Gerente:
         def Eliminar_Usuario():
             bd.CrearConexion()
             DNI = entry_dni.get()
+            id_usuario = entry_idUsuario.get()
 
 
             if not DNI:
@@ -483,7 +487,9 @@ class Ventana_Gerente:
             
             try:
                 query = "DELETE FROM Empleados WHERE DNI = %s"
+                query2 = "DELETE FROM Usuarios WHERE id_usuario = %s"
                 bd.Insertar_Datos(query,(DNI,))
+                bd.Insertar_Datos(query2,(id_usuario,))
                 messagebox.showinfo("Informacion","Usuario eliminado correctamente")
                 Actualizar_Tabla()
                 Limpiar_Campos()
@@ -657,7 +663,7 @@ class Ventana_Gerente:
 
         #Consulta para mostrar los datos en la tabla
         bd.CrearConexion()
-        query = "SELECT Nombre,Apellido,Direccion,Telefono,DNI,Sueldo FROM Empleados"
+        query = "SELECT Nombre,Apellido,Direccion,Telefono,DNI,Sueldo,id_usuario FROM Empleados"
         resultados = bd.ObtenerDatos(query,())
 
         #Apartir de los resultados obtenidos se utiliza un bucle para recorrerlos
