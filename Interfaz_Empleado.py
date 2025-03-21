@@ -13,7 +13,7 @@ class Ventana_Empleado:
         self.rol = rol
         self.dni_empleado = dni_empleado
         self.root.title("Ventana Empleados")
-        self.root.geometry("920x400")
+        self.root.geometry("790x400")
         self.root.resizable(0,0)
 
         self.vtn_empleado = vtn_empleado
@@ -34,6 +34,9 @@ class Ventana_Empleado:
 
         self.entry_id_pedido = Entry(self.root)
         self.entry_id_pedido.place(x=100,y=65)
+
+        self.label_total = CTkLabel(root,text=f"Total del Pedido: ",text_color="white",font=("verdana",30))
+        self.label_total.place(x=260,y=330)
 
         self.boton_confirmar = CTkButton(self.root,text="Confirmar Compra",fg_color="blue2",font=("Arial",15,),width=150,height=40,command=self.Confirmar_Compra)
         self.boton_confirmar.place(x=260,y=250)
@@ -59,7 +62,7 @@ class Ventana_Empleado:
         self.boton_salir = CTkButton(self.frame_lateral,text="SALIR",fg_color="blue2",width=185,command=self.Salir)
         self.boton_salir.place(x=40,y=320)
         
-        columnas = ("Medicamento","Cantidad","Metodo De Pago","Estado","Total")
+        columnas = ("Medicamento","Cantidad","Metodo De Pago","Estado")
 
         #Diseño de la seccion donde se implementara la tabla
         self.tabla = ttk.Treeview(self.root,columns=columnas,show="headings")
@@ -68,13 +71,11 @@ class Ventana_Empleado:
         self.tabla.heading("Cantidad",text="Cantidad")
         self.tabla.heading("Metodo De Pago",text="Metodo De Pago")
         self.tabla.heading("Estado",text="Pago")
-        self.tabla.heading("Total",text="Total")
 
         self.tabla.column("Medicamento",width=130,anchor="center")
         self.tabla.column("Cantidad",width=130,anchor="center")
         self.tabla.column("Metodo De Pago",width=130,anchor="center")
         self.tabla.column("Estado",width=130,anchor="center")
-        self.tabla.column("Total",width=130,anchor="center")
 
         self.tabla.place(x=255,y=10)
     
@@ -164,8 +165,13 @@ class Ventana_Empleado:
                 return
 
             if resultados:
+                total_pedido = resultados[0][-1]
+                self.label_total.configure(text=f"Total del Pedido: ${total_pedido:,.2f}")
+
                 for datos in resultados:
-                    self.tabla.insert("","end",values=datos)
+                    self.tabla.insert("","end",values=datos[:-1])
+                # for datos in resultados:
+                #     self.tabla.insert("","end",values=datos)
             else:
                 messagebox.showwarning("Advertencia","ID de pedido inexistente")
                 self.entry_id_pedido.delete(0,END)
@@ -219,6 +225,9 @@ class Ventana_Empleado:
                 query_actualizar = "UPDATE Usuarios u JOIN Empleados c ON u.id_usuario = c.id_usuario SET u.Contraseña = %s WHERE c.DNI = %s;"
                 bd.Insertar_Datos(query_actualizar,(contraseña_cifrada,self.dni_empleado))
                 messagebox.showinfo("Actulizar contraseña","Contraseña actualizada correctamente")
+                entry_clave_actual.delete(0,END)
+                entry_clave_nueva.delete(0,END)
+                entry_confirmar_clave.delete(0,END)
             #Se captura el error en caso de haberlo
             except Exception as err:
                 print(err)
@@ -377,6 +386,7 @@ class Ventana_Empleado:
 
     def Limpiar_Tabla(self):
         self.tabla.delete(*self.tabla.get_children())
+        self.label_total.configure(text=f"Total del Pedido: $0.00")
 
     def Retroceder(self,ventana):
         ventana.destroy()

@@ -88,23 +88,23 @@ class Ventana_Clientes:
 
         self.tabla_final.place(x=850,y=10)
 
-        self.boton_agregar = CTkButton(self.root,text="Agregar",fg_color="blue",command=self.Agregar_Producto)
-        self.boton_agregar.place(x=255,y=250)
+        self.boton_agregar = CTkButton(self.root,text="Agregar",fg_color="blue",font=("Arial",15,"bold"),width=220,height=35,command=self.Agregar_Producto)
+        self.boton_agregar.place(x=260,y=250)
 
-        self.boton_eliminar = CTkButton(self.root,text="Eliminar",fg_color="blue",command=self.Eliminar_Producto)
-        self.boton_eliminar.place(x=400,y=250)
+        self.boton_eliminar = CTkButton(self.root,text="Eliminar",fg_color="blue",font=("Arial",15,"bold"),width=220,height=35,command=self.Eliminar_Producto)
+        self.boton_eliminar.place(x=490,y=250)
 
         metodos_pago = ("Efectivo","Debito","Credito")
-        self.lista_metodopago = CTkOptionMenu(self.root,values=metodos_pago,width=200,height=35,fg_color="blue")
-        self.lista_metodopago.place(x=800,y=350)
+        self.lista_metodopago = CTkOptionMenu(self.root,values=metodos_pago,width=260,height=35,fg_color="blue",font=("Arial",15,"bold"))
+        self.lista_metodopago.place(x=850,y=250)
         self.lista_metodopago.set("Seleccionar Metodo De Pago")
 
         
         self.label_montoFinal = CTkLabel(self.root,text=f"Monto a pagar:",text_color="white",font=("verdana",30))
         self.label_montoFinal.place(x=260,y=420)
 
-        self.boton_finalizar = CTkButton(self.root,text="Finalizar Compra",fg_color="blue",text_color="white",width=70,height=30,command=self.Finalizar_Compra)
-        self.boton_finalizar.place(x=800,y=420)
+        self.boton_finalizar = CTkButton(self.root,text="Finalizar Compra",fg_color="blue",text_color="white",font=("Arial",15,"bold"),width=260,height=35,command=self.Finalizar_Compra)
+        self.boton_finalizar.place(x=850,y=290)
 
         self.boton_clave = CTkButton(self.frame_lateral,text="CAMBIAR CONTRASEÑA",fg_color="blue2",text_color="white",font=("Arial",15),command=self.Ventana_Contraseña)
         self.boton_clave.place(x=30,y=380)
